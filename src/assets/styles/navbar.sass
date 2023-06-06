@@ -1,0 +1,30 @@
+@use 'base'
+
+nav
+  padding: 10px 50px 0px 50px
+  background-color: base.$primary-color
+  overflow: hidden
+  height: 42px
+  display: flex
+  align-items: flex-end
+
+  a
+    padding: 6px 20px 8px 20px
+    display: inline-block
+    text-decoration: none
+    color: base.$invert-font-color
+    border-radius: base.$element-border-radius base.$element-border-radius 0 0
+    transition: padding 0.1s ease-out, box-shadow 0.05s ease-out
+
+    &.router-link-active
+      padding: 12px 20px 8px 20px !important
+      background: white !important
+      color: base.$default-font-color
+
+    &:hover, &:focus
+      box-shadow: 0 80px 20px -40px rgba(white, 0.5) inset
+      color: base.$default-font-color
+      padding: 8px 20px 8px 20px
+
+    &:focus
+      outline: none

@@ -1,0 +1,44 @@
+@use 'base'
+@use 'navbar'
+@use 'button'
+@use 'textbox'
+
+html, body
+  margin: 0
+  font-size: 12pt
+
+#app
+  font-family: Avenir, Helvetica, Arial, sans-serif
+  -webkit-font-smoothing: antialiased
+  -moz-osx-font-smoothing: grayscale
+  color: base.$default-font-color
+  margin: 0
+  padding: 0
+
+@mixin for-phone-screen
+  @media (max-width: 768px)
+    @content
+
+@mixin container-width($width: 768px)
+  $padding-size: calc((100% - $width) / 2)
+  padding-left: $padding-size
+  padding-right: $padding-size
+
+div.container
+  $navbar-height: 52px
+  $container-padding-topbottom: 50px
+  @include container-width
+  height: calc(100vh - $navbar-height - 2*$container-padding-topbottom)
+  padding-top: $container-padding-topbottom
+  padding-bottom: $container-padding-topbottom
+  overflow-y: scroll
+
+  @include for-phone-screen
+    // @include container-width($width: 500px)
+
+@media (min-width 800px)
+  div.container
+    $container-width: 200px
+    $container-padding-leftright: calc((100% - $container-width) / 2)
+    $container-padding-topbottom: 50px
+    padding: $container-padding-topbottom $container-padding-leftright

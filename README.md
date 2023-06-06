@@ -11,7 +11,5 @@ This repository contains a web application made for a senior project that uses T
 5. **Testing (NYI)**: To run unit tests, use `npm run test:unit`, and `npm run test:e2e` for end-to-end tests
 6. **Linting**: Source files can be linted by running `npm run lint`
 
-
-
 <!-- ### Customize configuration -->
 <!-- See [Configuration Reference](https://cli.vuejs.org/config/). -->

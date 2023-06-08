@@ -19,26 +19,30 @@ html, body
   @media (max-width: 768px)
     @content
 
-@mixin container-width($width: 768px)
-  $padding-size: calc((100% - $width) / 2)
-  padding-left: $padding-size
-  padding-right: $padding-size
-
 div.container
   $navbar-height: 52px
   $container-padding-topbottom: 50px
-  @include container-width
+  @include base.container-width
   height: calc(100vh - $navbar-height - 2*$container-padding-topbottom)
   padding-top: $container-padding-topbottom
   padding-bottom: $container-padding-topbottom
   overflow-y: scroll
 
   @include for-phone-screen
-    // @include container-width($width: 500px)
+    @include base.container-width($width: 400px)
 
-@media (min-width 800px)
-  div.container
-    $container-width: 200px
-    $container-padding-leftright: calc((100% - $container-width) / 2)
-    $container-padding-topbottom: 50px
-    padding: $container-padding-topbottom $container-padding-leftright
+select
+  @include base.basic-element-styles
+
+  &:focus
+    @include base.focus-outline($color: base.$primary-color)
+
+::-webkit-scrollbar
+  width: 12px
+
+::-webkit-scrollbar-track
+  margin: 12px 0px
+
+::-webkit-scrollbar-thumb
+  background: rgba(base.$scrollbar-thumb-color, 0.8)
+  border-radius: 6px

@@ -45,6 +45,78 @@
       <RadioButton label="Cool!!" group="00" />
       <RadioButton label="Ehe~ ;3" group="00" />
     </div>
+    <div>
+      <select name="myselect" @change="selectChoice">
+        <option value="a">Ant</option>
+        <option value="b">Bird</option>
+        <option value="c">Cat</option>
+        <option value="d">Dog</option>
+        <option value="e">Elephant</option>
+        <option value="f">Fish</option>
+        <option value="g">Goat</option>
+        <option value="h">Hippopotamus</option>
+        <option value="i">Imp</option>
+      </select>
+    </div>
+    <div>
+      <ModalDisplay class="primary" title="Hello there!" btn-value="Open modal">
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc elit
+          sapien, commodo vel aliquet nec, maximus non tortor. Cras luctus ut
+          massa ut sollicitudin. Curabitur nec augue felis. Aliquam facilisis
+          arcu id hendrerit imperdiet. Sed ornare ut ipsum efficitur consequat.
+          Nulla et molestie sem. Quisque elementum felis consequat sem mollis
+          eleifend. Praesent fermentum vehicula egestas. Suspendisse tempus odio
+          nec ipsum fermentum feugiat. Maecenas ipsum lectus, sollicitudin a
+          condimentum ut, maximus et enim.
+        </p>
+        <p>
+          Sed commodo lorem arcu, eget lobortis neque rutrum ac. Etiam eu dui
+          porttitor justo efficitur maximus non quis eros. Nunc tristique, urna
+          nec pharetra cursus, ex lorem varius purus, eu malesuada est massa
+          tincidunt velit. Quisque eu ullamcorper leo. Sed sed ante urna. Sed
+          egestas massa urna, fermentum varius eros viverra vel. Nullam
+          fermentum finibus lectus eu finibus. Vivamus dapibus libero sagittis
+          ex tristique cursus. Proin a est nec metus cursus dictum.
+        </p>
+        <p>
+          Sed commodo lorem arcu, eget lobortis neque rutrum ac. Etiam eu dui
+          porttitor justo efficitur maximus non quis eros. Nunc tristique, urna
+          nec pharetra cursus, ex lorem varius purus, eu malesuada est massa
+          tincidunt velit. Quisque eu ullamcorper leo. Sed sed ante urna. Sed
+          egestas massa urna, fermentum varius eros viverra vel. Nullam
+          fermentum finibus lectus eu finibus. Vivamus dapibus libero sagittis
+          ex tristique cursus. Proin a est nec metus cursus dictum.
+        </p>
+        <p>
+          Sed commodo lorem arcu, eget lobortis neque rutrum ac. Etiam eu dui
+          porttitor justo efficitur maximus non quis eros. Nunc tristique, urna
+          nec pharetra cursus, ex lorem varius purus, eu malesuada est massa
+          tincidunt velit. Quisque eu ullamcorper leo. Sed sed ante urna. Sed
+          egestas massa urna, fermentum varius eros viverra vel. Nullam
+          fermentum finibus lectus eu finibus. Vivamus dapibus libero sagittis
+          ex tristique cursus. Proin a est nec metus cursus dictum.
+        </p>
+        <p>
+          Sed commodo lorem arcu, eget lobortis neque rutrum ac. Etiam eu dui
+          porttitor justo efficitur maximus non quis eros. Nunc tristique, urna
+          nec pharetra cursus, ex lorem varius purus, eu malesuada est massa
+          tincidunt velit. Quisque eu ullamcorper leo. Sed sed ante urna. Sed
+          egestas massa urna, fermentum varius eros viverra vel. Nullam
+          fermentum finibus lectus eu finibus. Vivamus dapibus libero sagittis
+          ex tristique cursus. Proin a est nec metus cursus dictum.
+        </p>
+        <p>
+          Sed commodo lorem arcu, eget lobortis neque rutrum ac. Etiam eu dui
+          porttitor justo efficitur maximus non quis eros. Nunc tristique, urna
+          nec pharetra cursus, ex lorem varius purus, eu malesuada est massa
+          tincidunt velit. Quisque eu ullamcorper leo. Sed sed ante urna. Sed
+          egestas massa urna, fermentum varius eros viverra vel. Nullam
+          fermentum finibus lectus eu finibus. Vivamus dapibus libero sagittis
+          ex tristique cursus. Proin a est nec metus cursus dictum.
+        </p>
+      </ModalDisplay>
+    </div>
   </div>
 </template>
 
@@ -57,12 +129,19 @@ div
 import { defineComponent } from "vue";
 import CheckBox from "@/components/CheckBox.vue";
 import RadioButton from "@/components/RadioButton.vue";
+import ModalDisplay from "@/components/ModalDisplay.vue";
 
 export default defineComponent({
   name: "HomeView",
   components: {
     CheckBox,
     RadioButton,
+    ModalDisplay,
+  },
+  methods: {
+    selectChoice(e: Event) {
+      console.log((e.target as HTMLSelectElement).value);
+    },
   },
 });
 </script>

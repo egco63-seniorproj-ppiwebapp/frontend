@@ -4,13 +4,10 @@ $fill-button: 0 -60px 0 30px inset
 
 // Button Base
 input[type="button"]
-  padding: base.$element-padding
+  @include base.basic-element-styles
   background: base.$default-color
   color: base.$invert-font-color
-  font-family: inherit
-  font-size: inherit
   border: none
-  border-radius: base.$element-border-radius
   transition: 0.1s ease-out
 
   &:hover

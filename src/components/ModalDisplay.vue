@@ -79,7 +79,7 @@ export default defineComponent({
   transition: opacity 0.12s ease-out
   .modal-scroll-wrapper
     position: relative
-    overflow-y: scroll
+    overflow-y: auto
     padding: 0 10px
     height: 100vh
     top: 40px
@@ -119,4 +119,16 @@ export default defineComponent({
       &>.modal-body
         grid-area: body
         padding: 20px 0
+
+@-moz-document url-prefix()
+  .modal-wrapper
+    overflow-y: scroll
+    height: 100vh
+    padding-top: 80px
+    padding-bottom: 80px
+    box-shadow: -50px 0 50px -50px rgba(black, 0.5) inset
+    .modal-scroll-wrapper
+      overflow-y: visible
+      .modal-container
+        margin-top: 0
 </style>

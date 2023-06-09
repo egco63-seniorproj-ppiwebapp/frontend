@@ -69,7 +69,8 @@ export default defineComponent({
   top: 0
   left: 0
   $width: 800px
-  @include base.container-width($margin: 0px)
+  $padding-size: calc((100% - $width) / 2)
+  padding: 0 $padding-size
   width: calc($width)
   height: 100vh
   backdrop-filter: blur(4px) brightness(50%)

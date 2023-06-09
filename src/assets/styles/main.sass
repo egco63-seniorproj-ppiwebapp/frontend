@@ -22,14 +22,12 @@ html, body
 div.container
   $navbar-height: 52px
   $container-padding-topbottom: 50px
-  @include base.container-width
   height: calc(100vh - $navbar-height - 2*$container-padding-topbottom)
   padding-top: $container-padding-topbottom
   padding-bottom: $container-padding-topbottom
   overflow-y: scroll
 
   @include for-phone-screen
-    @include base.container-width($width: 400px)
 
 select
   @include base.basic-element-styles

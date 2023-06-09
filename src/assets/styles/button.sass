@@ -3,7 +3,7 @@
 $fill-button: 0 -60px 0 30px inset
 
 // Button Base
-input[type="button"]
+input[type="button"], input[type="submit"], button
   @include base.basic-element-styles
   background: base.$default-color
   color: base.$invert-font-color
@@ -28,65 +28,65 @@ input[type="button"]
   &:not(:last-child)
     margin-right: base.$element-space
 
-// Outline Base
-input[type="button"].outline
-  background: transparent
-  color: base.$default-color
-  border: 1px solid base.$default-color
-  padding: calc(base.$element-padding - 1px)
+  // Outline Base
+  &.outline
+    background: transparent
+    color: base.$default-color
+    border: 1px solid base.$default-color
+    padding: calc(base.$element-padding - 1px)
 
-  &:hover
-    background: base.$default-color
-    color: base.$invert-font-color
-    box-shadow: 0 20px 8px -20px rgba(base.$shadow-color, 0.2) inset
+    &:hover
+      background: base.$default-color
+      color: base.$invert-font-color
+      box-shadow: 0 20px 8px -20px rgba(base.$shadow-color, 0.2) inset
 
-  &:active
-    box-shadow: 0 15px 8px -20px rgba(base.$shadow-color, 0.2) inset, $fill-button rgba(base.$shadow-color, 0.15)
+    &:active
+      box-shadow: 0 15px 8px -20px rgba(base.$shadow-color, 0.2) inset, $fill-button rgba(base.$shadow-color, 0.15)
 
-  &:disabled
-    box-shadow: none
-    background: base.$disabled-color !important
-    color: base.$default-color !important
+    &:disabled
+      box-shadow: none
+      background: base.$disabled-color !important
+      color: base.$default-color !important
 
-// Primary Button
-input[type="button"].primary
-  background: base.$primary-color
-
-  &:focus
-    outline-color: rgba(base.$primary-color, 50%)
-
-input[type="button"].primary.outline
-  background: transparent
-  color: base.$primary-color
-  border: 1px solid base.$primary-color
-  padding: 11px
-
-  &:hover
+  // Primary Button
+  &.primary
     background: base.$primary-color
-    color: base.$invert-font-color
 
-// Secondary Button
-input[type="button"].secondary
-  background: base.$secondary-color
+    &:focus
+      outline-color: rgba(base.$primary-color, 50%)
 
-  &:focus
-    outline-color: rgba(base.$secondary-color, 50%)
+  &.primary.outline
+    background: transparent
+    color: base.$primary-color
+    border: 1px solid base.$primary-color
+    padding: 11px
 
-input[type="button"].secondary.outline
-  background: transparent
-  color: base.$secondary-color
-  border: 1px solid base.$secondary-color
-  padding: 11px
+    &:hover
+      background: base.$primary-color
+      color: base.$invert-font-color
 
-  &:hover
+  // Secondary Button
+  &.secondary
     background: base.$secondary-color
-    color: base.$invert-font-color
 
-// Link Button
-input[type="button"].link
-  background: none
-  color: base.$default-font-color
+    &:focus
+      outline-color: rgba(base.$secondary-color, 50%)
 
-  &:focus
-    outline: none
-    text-decoration: 1px underline
+  &.secondary.outline
+    background: transparent
+    color: base.$secondary-color
+    border: 1px solid base.$secondary-color
+    padding: 11px
+
+    &:hover
+      background: base.$secondary-color
+      color: base.$invert-font-color
+
+  // Link Button
+  &.link
+    background: none
+    color: base.$default-font-color
+
+    &:focus
+      outline: none
+      text-decoration: 1px underline

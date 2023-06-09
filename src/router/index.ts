@@ -3,8 +3,9 @@ import HomeView from "@/views/HomeView.vue";
 import UploadView from "@/views/UploadView.vue";
 import ImagesView from "@/views/ImagesView.vue";
 import SettingsView from "@/views/SettingsView.vue";
-import LoginView from "@/views/LoginView.vue";
 import NavBar from "@/components/NavBar.vue";
+
+const lazyLoad = (view: string) => import(`@/views/${view}.vue`);
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -42,18 +43,12 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/login",
     name: "login",
-    component: LoginView,
+    component: lazyLoad("LoginView"),
   },
   {
     path: "/:pathMatch(.*)*",
     redirect: { name: "home" },
   },
-  // {
-  //   path: "/settings",
-  //   name: "settings",
-  //   component: () =>
-  //     import(/* webpackChunkName: "about" */ "../views/SettingsView.vue"),
-  // },
 ];
 
 const router = createRouter({

@@ -1,7 +1,7 @@
 <template>
   <div class="thumbnail" tabindex="0">
     <div class="image-wrapper">
-      <img :src="img" @error="setErrorImg" />
+      <img :src="img" @error="setErrorImg" draggable="false" />
       <div class="taglist">
         <span v-for="tag in sortTags(tags)" :key="tag">
           {{ tag }}

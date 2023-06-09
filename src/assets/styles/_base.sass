@@ -23,3 +23,7 @@ $scrollbar-thumb-color: #cccccc
   font-family: inherit
   font-size: inherit
   border-radius: $element-border-radius
+
+@mixin for-screen-narrower-than($width: 800px)
+  @media (max-width: $width)
+    @content

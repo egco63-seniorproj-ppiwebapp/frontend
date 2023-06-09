@@ -5,7 +5,7 @@ import ImagesView from "@/views/ImagesView.vue";
 import SettingsView from "@/views/SettingsView.vue";
 import NavBar from "@/components/NavBar.vue";
 
-const lazyLoad = (view: string) => import(`@/views/${view}.vue`);
+const lazyLoad = (view: string) => () => import(`@/views/${view}.vue`);
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -15,6 +15,7 @@ const routes: Array<RouteRecordRaw> = [
       default: HomeView,
       NavBar,
     },
+    meta: { title: "Home" },
   },
   {
     path: "/upload",
@@ -23,6 +24,7 @@ const routes: Array<RouteRecordRaw> = [
       default: UploadView,
       NavBar,
     },
+    meta: { title: "Upload" },
   },
   {
     path: "/images",
@@ -31,6 +33,7 @@ const routes: Array<RouteRecordRaw> = [
       default: ImagesView,
       NavBar,
     },
+    meta: { title: "Images" },
   },
   {
     path: "/settings",
@@ -39,11 +42,13 @@ const routes: Array<RouteRecordRaw> = [
       default: SettingsView,
       NavBar,
     },
+    meta: { title: "Settings" },
   },
   {
     path: "/login",
     name: "login",
     component: lazyLoad("LoginView"),
+    meta: { title: "Login" },
   },
   {
     path: "/:pathMatch(.*)*",
@@ -54,6 +59,18 @@ const routes: Array<RouteRecordRaw> = [
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
+});
+
+declare module "vue-router" {
+  interface RouteMeta {
+    title?: string;
+  }
+}
+
+router.beforeEach((to, from, next) => {
+  const title = to.meta.title;
+  if (title) document.title = `WebApp - ${title}`;
+  next();
 });
 
 export default router;

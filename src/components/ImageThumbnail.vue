@@ -70,8 +70,6 @@ export default defineComponent({
 
   &:hover, &:focus
     background: #eeeeee
-    box-shadow: 0 2px 8px -2px rgba(base.$shadow-color, 0.5)
-    transform: translateY(-2px)
     cursor: pointer
     border-color: base.$primary-color
 
@@ -99,7 +97,7 @@ export default defineComponent({
       position: absolute
       bottom: 0px
       left: 0px
-      margin: 10px 5px
+      margin: 10px
 
       span
         background: #aaee99
@@ -109,6 +107,7 @@ export default defineComponent({
         font-weight: bold
         display: inline-block
         margin-top: 6px
+        box-shadow: 0 0 12px -4px rgba(base.$shadow-color, 0.2), 0 0 0 1px rgba(base.$shadow-color, 0.1) inset
 
         &:not(:last-child)
           margin-right: 4px

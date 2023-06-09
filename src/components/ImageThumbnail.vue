@@ -15,14 +15,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 
-export enum Tag {
-  Cat = "Calico Cat",
-  Dog = "Shiba",
-  Fish = "Fish",
-  Goat = "Mountain Goat",
-}
-
-const errorImage = "paw.png";
+const errorImage = "foot.png";
 
 export default defineComponent({
   name: "ImageThumbnail",
@@ -32,8 +25,8 @@ export default defineComponent({
       default: "",
     },
     tags: {
-      type: Array as PropType<Tag[]>,
-      default: () => [] as Tag[],
+      type: Array as PropType<string[]>,
+      default: () => [] as string[],
     },
     img: {
       type: String,
@@ -45,7 +38,7 @@ export default defineComponent({
       const el = e.target as HTMLImageElement;
       el.src = errorImage;
     },
-    sortTags(tags: Tag[]) {
+    sortTags(tags: string[]) {
       return tags.map((a) => a).sort();
     },
   },

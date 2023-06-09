@@ -1,0 +1,97 @@
+[
+	{
+		"name": "Corgi",
+		"tags": [
+			"Meow",
+			"Woof"
+		],
+		"img": "https://i.pinimg.com/564x/f4/bf/d3/f4bfd3f545f207a8668333d8cdc150b5.jpg"
+	},
+	{
+		"name": "Wizard Gato",
+		"tags": [
+			"Fish"
+		],
+		"img": "https://upload-os-bbs.hoyolab.com/upload/2023/04/02/187634551/436d41f74f0bc8f3c03dfe5db17c29a9_4932196110328501651.jpg?x-oss-process=image%2Fquality%2Cq_80%2Fauto-orient%2C0%2Finterlace%2C1%2Fformat%2Cwebp"
+	},
+	{
+		"name": "Red",
+		"tags": [
+			"Mountain Goat"
+		],
+		"img": "https://i.pinimg.com/236x/79/97/d6/7997d655b251db000e415dbae7c98553--petit-panda-red-pandas.jpg"
+	},
+	{
+		"name": "Shiny Fox",
+		"tags": [
+			"Mountain Goat",
+			"Fish",
+			"Meow",
+			"Woof"
+		],
+		"img": "https://i.pinimg.com/originals/b0/2a/f2/b02af2bc0c71b6af5762b0012c4abe76.jpg"
+	},
+	{
+		"name": "Goat wont load",
+		"tags": [
+			"Mountain Goat"
+		],
+		"img": "vue.png"
+	},
+	{
+		"name": "Bird",
+		"tags": [
+			"Winged"
+		],
+		"img": "https://i.pinimg.com/474x/d0/36/79/d03679d65270f58ed6cd4d14cab5e49f.jpg"
+	},
+	{
+		"name": "Azureous",
+		"tags": [
+			"Winged"
+		],
+		"img": "https://i.pinimg.com/originals/a0/72/f0/a072f0b8aff1296109d22ce18d7a8185.png"
+	},
+	{
+		"name": "Plant Dragon",
+		"tags": [
+			"Winged"
+		],
+		"img": "https://i.pinimg.com/736x/13/bf/97/13bf977c1ac98b80171410312100602a.jpg"
+	},
+	{
+		"name": "Authmn Fox",
+		"tags": [
+			"Fox"
+		],
+		"img": "https://i.pinimg.com/736x/63/2d/23/632d23ebed9162874782685796130c72.jpg"
+	},
+	{
+		"name": "Wolfgang",
+		"tags": [
+			"Doggo"
+		],
+		"img": "https://i.pinimg.com/736x/bf/3d/d1/bf3dd166eae11848c70e25db08ad1699.jpg"
+	},
+	{
+		"name": "Duck juice",
+		"tags": [
+			"Yum"
+		],
+		"img": "https://i.pinimg.com/originals/7d/eb/04/7deb045391ac7c00e7373bdc0d4d8e67.jpg"
+	},
+	{
+		"name": "Why?",
+		"tags": [
+			"Meow"
+		],
+		"img": "https://i.pinimg.com/originals/3e/20/82/3e2082a24dbbf8e92d8fd65816d9bd55.png"
+	},
+	{
+		"name": "Cat obviously",
+		"tags": [
+			"Meow"
+		],
+		"img": "https://i.pinimg.com/736x/35/d2/50/35d25069118015a2ded224f0cc794fb8.jpg"
+	}
+]

@@ -15,19 +15,13 @@ html, body
   margin: 0
   padding: 0
 
-@mixin for-phone-screen
-  @media (max-width: 768px)
-    @content
-
-div.container
+.view-container
   $navbar-height: 52px
   $container-padding-topbottom: 50px
   height: calc(100vh - $navbar-height - 2*$container-padding-topbottom)
   padding-top: $container-padding-topbottom
   padding-bottom: $container-padding-topbottom
   overflow-y: scroll
-
-  @include for-phone-screen
 
 select
   @include base.basic-element-styles

@@ -5,5 +5,7 @@
     <router-link to="/images">Images</router-link>
     <router-link to="/settings">Settings</router-link>
   </nav>
-  <router-view />
+  <div class="view-container">
+    <router-view />
+  </div>
 </template>

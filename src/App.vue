@@ -1,10 +1,5 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link>
-    <router-link to="/upload">Upload</router-link>
-    <router-link to="/images">Images</router-link>
-    <router-link to="/settings">Settings</router-link>
-  </nav>
+  <router-view name="NavBar" />
   <div class="view-container">
     <router-view />
   </div>

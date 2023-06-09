@@ -11,7 +11,7 @@ import ImageGrid from "@/components/ImageGrid.vue";
 import images from "@/assets/images.json";
 
 export default defineComponent({
-  name: "HomeView",
+  name: "ImagesView",
   components: {
     ImageGrid,
   },

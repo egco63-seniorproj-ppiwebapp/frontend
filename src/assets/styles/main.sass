@@ -10,6 +10,7 @@ html, body
   margin: 0
   font-size: 12pt
   user-select: none
+  height: 100%
 
 #app
   font-family: Avenir, Helvetica, Arial, sans-serif
@@ -18,11 +19,15 @@ html, body
   color: base.$default-font-color
   margin: 0
   padding: 0
+  display: grid
+  grid-auto-rows: max-content auto
+  height: 100%
+
+.view-container
+  overflow-y: auto
 
 .container
-  height: calc(100vh - navbar.$navbar-height)
   padding: 1.5rem
-  overflow-y: auto
 
 select
   @include base.basic-element-styles

@@ -14,7 +14,6 @@
   >
     <div class="modal-scroll-wrapper">
       <div class="modal-container">
-        <h1>{{ title }}</h1>
         <input class="x-btn" type="button" @click="hideModal" value="⨉" />
         <div class="modal-body"><slot></slot></div>
       </div>
@@ -28,7 +27,6 @@ import { defineComponent } from "vue";
 export default defineComponent({
   name: "ModalDisplay",
   props: {
-    title: String,
     btnValue: { type: String, default: "" },
     width: { type: Number, default: 800 },
   },
@@ -89,13 +87,14 @@ export default defineComponent({
   opacity: 0
   visibility: hidden
   transition: opacity 0.12s ease-out
+  z-index: 100
   .modal-scroll-wrapper
     margin: auto
     position: relative
     overflow-y: auto
     padding: 0 10px
     height: 100vh
-    max-width: 800px
+    max-width: 1500px
     top: 40px
     transition: top 0.2s cubic-bezier(0, 0, 0, 1)
 
@@ -103,21 +102,14 @@ export default defineComponent({
       margin: 80px 0
 
     .modal-container
-      background-color: white
-      padding: 50px
+      $padding-size: 50px
+      padding: $padding-size
       margin: 80px 0
+      position: relative
+      background-color: white
       border-radius: 12px
-      display: grid
-      grid-template-columns: auto 50px
-      grid-template-rows: 50px auto
-      grid-template-areas: "head x-btn" "body body"
 
-      &>h1
-        grid-area: head
-        margin: 0
-        margin-top: 8px
       &>.x-btn
-        grid-area: x-btn
         margin: 0
         font-size: 30px
         padding: 0
@@ -125,14 +117,16 @@ export default defineComponent({
         height: 50px
         color: base.$default-color
         background: none
+        position: absolute
+        top: $padding-size
+        right: $padding-size
 
         &:hover
           background: #f37e7e
           color: base.$invert-font-color
 
       &>.modal-body
-        grid-area: body
-        padding: 20px 0
+        min-height: 50px
 
 @-moz-document url-prefix()
   .modal-wrapper

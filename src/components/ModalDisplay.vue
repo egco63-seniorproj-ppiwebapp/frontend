@@ -1,5 +1,11 @@
 <template>
-  <input type="button" @click="showModal" :value="btnValue" v-bind="$attrs" />
+  <input
+    type="button"
+    @click="showModal"
+    :value="btnValue"
+    v-bind="$attrs"
+    v-if="btnValue.length > 0"
+  />
   <div
     :class="[wrapperClass, { show }]"
     @click="onWrapperClicked"
@@ -23,7 +29,8 @@ export default defineComponent({
   name: "ModalDisplay",
   props: {
     title: String,
-    btnValue: String,
+    btnValue: { type: String, default: "" },
+    width: { type: Number, default: 800 },
   },
   data: () => ({
     show: false,
@@ -52,6 +59,13 @@ export default defineComponent({
         this.hideModal();
     },
   },
+  updated() {
+    const wrapper = this.$refs.modalWrapper as HTMLDivElement;
+    const scroller = wrapper.querySelector(
+      ".modal-scroll-wrapper"
+    ) as HTMLDivElement;
+    scroller.style.maxWidth = `${this.width}px`;
+  },
 });
 </script>
 
@@ -68,20 +82,20 @@ export default defineComponent({
   position: fixed
   top: 0
   left: 0
-  $width: 800px
-  $padding-size: calc((100% - $width) / 2)
-  padding: 0 $padding-size
+  padding: 0
   width: 100%
   height: 100vh
-  backdrop-filter: blur(4px) brightness(50%)
+  backdrop-filter: brightness(30%)
   opacity: 0
   visibility: hidden
   transition: opacity 0.12s ease-out
   .modal-scroll-wrapper
+    margin: auto
     position: relative
     overflow-y: auto
     padding: 0 10px
     height: 100vh
+    max-width: 800px
     top: 40px
     transition: top 0.2s cubic-bezier(0, 0, 0, 1)
 

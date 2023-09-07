@@ -1,0 +1,103 @@
+.upload-view {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.logo-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+  margin-left: 100px;
+}
+
+.fa-icon {
+  font-size: 50px;
+  margin-right: 20px;
+}
+
+.content {
+  width: 100%;
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.drop-area {
+  width: 800px;
+  margin: 0 auto;
+  height: 500px;
+  border: 2px dashed #ccc;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.drop-message-text {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.bold-text {
+  font-weight: bold;
+  color: black;
+  font-size: 25px;
+}
+
+.gray-text,
+.underline {
+  color: #aaa;
+  font-size: 20px;
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+.or-line {
+  color: #aaa;
+  font-size: 20px;
+  position: relative;
+  display: inline-block;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.or-line::before,
+.or-line::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 50px;
+  background-color: #aaa;
+  height: 1px;
+  transform: translateY(-50%);
+}
+
+.or-line::before {
+  left: 0;
+  margin-left: -50px;
+}
+
+.or-line::after {
+  right: 0;
+  margin-right: -50px;
+}
+
+.primary {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.p-margin {
+  margin-top: 35px;
+}

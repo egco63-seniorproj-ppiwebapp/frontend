@@ -9,6 +9,7 @@
       <h1>Import your File or Folder</h1>
     </header>
     <div class="content">
+      <div class="side-space"></div>
       <div class="drop-area" @dragover.prevent @drop="handleFileDrop">
         <div class="drop-message">
           <p class="drop-message-text">
@@ -38,7 +39,9 @@
           </p>
         </div>
       </div>
+      <div class="side-space"></div>
     </div>
+    <footer class="footer"></footer>
   </div>
 </template>
 

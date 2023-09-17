@@ -129,3 +129,50 @@
     padding-left: 10px;
   }
 }
+
+/*/////////////////////////////////////////////////////////////////  */
+
+.upload-section {
+  padding-left: 10px;
+}
+
+.upload-text {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.file-upload-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.file-name {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.progress-container {
+  flex: 2;
+  height: 10px;
+  background: #d6d6d6;
+  margin: 0 10px;
+}
+
+.progress-bar {
+  height: 100%;
+  background: green;
+  transition: width 0.3s;
+}
+
+.cancel-icon {
+  cursor: pointer;
+  padding: 5px;
+  background: red;
+  color: white;
+  border-radius: 50%;
+}
+

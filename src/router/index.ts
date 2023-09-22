@@ -3,6 +3,7 @@ import HomeView from "@/views/HomeView.vue";
 import UploadView from "@/views/UploadView.vue";
 import ImagesView from "@/views/ImagesView.vue";
 import SettingsView from "@/views/SettingsView.vue";
+import testView from "@/views/testView.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -24,6 +25,11 @@ const routes: Array<RouteRecordRaw> = [
     path: "/settings",
     name: "settings",
     component: SettingsView,
+  },
+  {
+    path: "/test",
+    name: "test",
+    component: testView,
   },
   // {
   //   path: "/settings",

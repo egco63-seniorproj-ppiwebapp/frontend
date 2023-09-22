@@ -10,8 +10,8 @@
     </header>
     <div class="content">
       <div class="side-space"></div>
-      <div class="drop-area" @dragover.prevent @drop="handleFileDrop">
-        <div class="drop-message" v-if="!isUploading">
+      <div class="drop-area" @dragover.prevent @drop.prevent="handleFileDrop">
+        <div class="drop-message-unupload" v-if="!isUploading">
           <p class="drop-message-text">
             <span class="bold-text">Drop your file or Folder here</span>
           </p>
@@ -34,9 +34,10 @@
             <input
               type="file"
               ref="fileInput"
-              @change="uploadFile"
+              @change="fileInputChange"
               style="display: none"
               accept=".jpeg,.jpg,.png"
+              multiple
             />
             <input
               type="button"
@@ -46,23 +47,50 @@
             />
           </p>
         </div>
-        <div class="drop-message" v-if="isUploading">
+        <div class="drop-message-isupload" v-if="isUploading">
           <div class="upload-section">
             <p class="upload-text">Uploading...</p>
-            <div
-              v-for="file in uploadingFiles"
-              :key="file.name"
-              class="file-upload-container"
-            >
-              <span class="file-name">{{ file.name }}</span>
-              <div class="progress-container">
-                <div
-                  :style="{ width: file.progress + '%' }"
-                  class="progress-bar"
-                ></div>
+            <div style="max-height: 400px; overflow-y: auto">
+              <!-- ครอบ v-for ใน div นี้ -->
+              <div
+                v-for="file in uploadingFiles"
+                :key="file.name"
+                class="file-upload-container"
+              >
+                <span
+                  class="file-name"
+                  style="text-align: left; text-decoration: 
+    {{ file.isCancelled ? 'line-through' : 'none' }}"
+                >
+                  {{ file.name }}
+                </span>
+
+                <div class="progress-container">
+                  <div
+                    :style="{ width: file.progress + '%' }"
+                    class="progress-bar"
+                  ></div>
+                </div>
+
+                <span
+                  class="cancel-icon"
+                  :style="
+                    file.isCancelled
+                      ? { color: 'lightgray', cursor: 'default' }
+                      : {}
+                  "
+                  @click="!file.isCancelled && cancelUpload(file)"
+                >
+                  x
+                </span>
               </div>
-              <span class="cancel-icon" @click="cancelUpload(file)">x</span>
             </div>
+            <input
+              type="button"
+              value="Upload All"
+              class="primary"
+              @click="uploadAll"
+            />
           </div>
         </div>
       </div>
@@ -87,44 +115,60 @@ export default {
     };
   },
   methods: {
+    handleFileDrop(event) {
+      let files = [];
+      if (event.dataTransfer.items) {
+        for (let i = 0; i < event.dataTransfer.items.length; i++) {
+          if (event.dataTransfer.items[i].kind === "file") {
+            files.push(event.dataTransfer.items[i].getAsFile());
+          }
+        }
+      } else {
+        files = Array.from(event.dataTransfer.files);
+      }
+      this.uploadFile(files);
+    },
     triggerFileInput() {
       this.$refs.fileInput.click();
     },
-    async uploadFile(event) {
+    async uploadFile(files) {
       this.isUploading = true;
-      const file = event.target.files[0];
-      this.uploadingFiles.push({ name: file.name, progress: 0 });
 
-      let formData = new FormData();
-      formData.append("file", file);
-
-      try {
-        let response = await fetch("http://127.0.0.1:8000/upload", {
-          method: "POST",
-          body: formData,
+      files.forEach((file) => {
+        this.uploadingFiles.push({
+          name: file.name,
+          progress: 0,
+          isCancelled: false,
         });
 
-        if (response.ok) {
-          let result = await response.json();
-          this.responseMessage = result.message;
-          const fileIndex = this.uploadingFiles.findIndex(
-            (f) => f.name === file.name
-          );
-          if (fileIndex !== -1) {
-            this.uploadingFiles[fileIndex].progress = 100;
-            setTimeout(() => {
-              this.uploadingFiles.splice(fileIndex, 1);
-            }, 1000);
-          }
-        } else {
-          console.error("File upload failed");
-          this.responseMessage = "File upload failed";
+        // เตรียมข้อมูล formData
+        let formData = new FormData();
+        formData.append("file", file);
+
+        // ตั้งค่า progress bar เป็น 100% เมื่อเตรียมข้อมูลเสร็จ
+        const fileIndex = this.uploadingFiles.findIndex(
+          (f) => f.name === file.name
+        );
+        if (fileIndex !== -1) {
+          this.uploadingFiles[fileIndex].progress = 100;
         }
-      } catch (error) {
-        console.error("There was an error uploading the file.", error);
-        this.responseMessage = error.message || "Unknown error occurred.";
-      } finally {
-        // this.isUploading = false;
+      });
+
+      // ไม่ต้องมีโค้ดยิง API และการจัดการ error ใดๆ
+    },
+    fileInputChange(event) {
+      const files = Array.from(event.target.files);
+      this.uploadFile(files);
+    },
+    incrementProgress(fileName) {
+      const fileIndex = this.uploadingFiles.findIndex(
+        (f) => f.name === fileName
+      );
+      if (fileIndex !== -1 && this.uploadingFiles[fileIndex].progress < 100) {
+        this.uploadingFiles[fileIndex].progress += 10; // ทุก ๆ 100ms เพิ่ม 10%
+        setTimeout(() => {
+          this.incrementProgress(fileName);
+        }, 100);
       }
     },
     cancelUpload(file) {
@@ -132,8 +176,25 @@ export default {
         (f) => f.name === file.name
       );
       if (fileIndex !== -1) {
-        this.uploadingFiles.splice(fileIndex, 1);
+        this.uploadingFiles[fileIndex].isCancelled = true;
       }
+    },
+    uploadAll() {
+      const formData = new FormData();
+
+      // กรองไฟล์ที่ไม่ถูกยกเลิก
+      const filesToUpload = this.selectedFiles.filter(
+        (file) => !file.isCancelled
+      );
+
+      // เพิ่มไฟล์ที่จะอัพโหลดลงใน formData
+      filesToUpload.forEach((file) => {
+        formData.append("file", file);
+      });
+
+      // ทำการยิง API ที่นี่...
+      const fileNames = filesToUpload.map((file) => file.name).join(", ");
+      alert(`Files to be uploaded: ${fileNames}`);
     },
   },
 };

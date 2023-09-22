@@ -28,6 +28,7 @@
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
   min-height: 460px;
+  overflow: auto;
 }
 
 .drop-area {
@@ -115,12 +116,16 @@
 @media (max-height: 600px) {
   .drop-area {
     min-height: 200px;
+    grid-column: 1;
   }
 }
 
 @media (max-width: 768px) {
   .logo-header {
     padding-left: 20px;
+  }
+  .content {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -176,3 +181,8 @@
   border-radius: 50%;
 }
 
+.cancel-icon[disabled] {
+  cursor: not-allowed;
+  background-color: lightgray;
+  pointer-events: none;
+}

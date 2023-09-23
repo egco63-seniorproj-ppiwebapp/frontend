@@ -1,5 +1,5 @@
 /* Base Styles */
-.upload-view {
+/* .upload-view {
   display: grid;
   grid-template-rows: 100px 1fr 100px;
   grid-template-columns: 1fr 3fr 1fr;
@@ -39,10 +39,10 @@
   padding: 20px;
   text-align: center;
   cursor: pointer;
-}
+} */
 
 /* Typography */
-.fa-icon {
+/* .fa-icon {
   font-size: 50px;
   margin-right: 20px;
 }
@@ -95,10 +95,10 @@
 .or-line::after {
   right: 0;
   margin-right: -50px;
-}
+} */
 
 /* Buttons */
-.primary {
+/* .primary {
   background-color: #007bff;
   color: white;
   border: none;
@@ -110,10 +110,10 @@
 
 .p-margin {
   margin-top: 35px;
-}
+} */
 
 /* Media Queries */
-@media (max-height: 600px) {
+/* @media (max-height: 600px) {
   .drop-area {
     min-height: 200px;
     grid-column: 1;
@@ -133,10 +133,10 @@
   .logo-header {
     padding-left: 10px;
   }
-}
+} */
 
 /*/////////////////////////////////////////////////////////////////  */
-
+/* 
 .upload-section {
   padding-left: 10px;
 }
@@ -185,4 +185,4 @@
   cursor: not-allowed;
   background-color: lightgray;
   pointer-events: none;
-}
+} */

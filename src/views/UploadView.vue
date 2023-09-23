@@ -1,200 +1,294 @@
 <template>
-  <div class="upload-view">
-    <header class="logo-header">
+  <div class="grid-container">
+    <div class="flex-2-head">
       <font-awesome-icon
         class="fa-icon"
         icon="folder-plus"
         :style="{ color: '#62aa92' }"
       />
       <h1>Import your File or Folder</h1>
-    </header>
-    <div class="content">
-      <div class="side-space"></div>
+      <!-- <input
+        type="button"
+        value="switch event"
+        class="primary"
+        @click="clickswitch"
+      /> -->
+    </div>
+    <div class="col"></div>
+    <div class="col-6-upload">
       <div class="drop-area" @dragover.prevent @drop.prevent="handleFileDrop">
         <div class="drop-message-unupload" v-if="!isUploading">
-          <p class="drop-message-text">
-            <span class="bold-text">Drop your file or Folder here</span>
-          </p>
-          <p class="p-margin">
-            <font-awesome-icon
-              :icon="['far', 'file-image']"
-              :style="{ color: '#d6d6d6' }"
-              size="6x"
-            />
-          </p>
-          <p class="p-margin">
-            <span class="gray-text">and </span>
-            <span class="underline">other similar</span>
-            <span class="gray-text"> file types</span>
-          </p>
-          <p class="p-margin">
-            <span class="or-line">or</span>
-          </p>
-          <p class="p-margin">
-            <input
-              type="file"
-              ref="fileInput"
-              @change="fileInputChange"
-              style="display: none"
-              accept=".jpeg,.jpg,.png"
-              multiple
-            />
-            <input
-              type="button"
-              value="Import File or Folder.."
-              class="primary"
-              @click="triggerFileInput"
-            />
-          </p>
+          <div class="drop-text">
+            <span class="bold-text-drop">Drop your file or Folder here</span>
+          </div>
+          <div class="drop-area-content">
+            <p class="p-margin">
+              <font-awesome-icon
+                :icon="['far', 'file-image']"
+                :style="{ color: '#d6d6d6' }"
+                size="6x"
+              />
+            </p>
+            <p class="p-margin">
+              <span class="gray-text">and </span>
+              <span class="underline">other similar</span>
+              <span class="gray-text"> file types</span>
+            </p>
+            <p class="p-margin">
+              <span class="or-line">or</span>
+            </p>
+            <p class="p-margin">
+              <input
+                type="file"
+                ref="fileInput"
+                @change="fileInputChange"
+                style="display: none"
+                accept=".jpeg,.jpg,.png"
+                multiple
+              />
+              <input
+                type="button"
+                value="Import File or Folder.."
+                class="primary"
+                @click="triggerFileInput"
+              />
+            </p>
+          </div>
         </div>
         <div class="drop-message-isupload" v-if="isUploading">
-          <div class="upload-section">
-            <p class="upload-text">Uploading...</p>
-            <div style="max-height: 400px; overflow-y: auto">
-              <!-- ครอบ v-for ใน div นี้ -->
-              <div
-                v-for="file in uploadingFiles"
-                :key="file.name"
-                class="file-upload-container"
-              >
-                <span
-                  class="file-name"
-                  style="text-align: left; text-decoration: 
-    {{ file.isCancelled ? 'line-through' : 'none' }}"
-                >
+          <div class="upload-text">
+            <span class="bold-text-upload">uploading....</span>
+          </div>
+          <div class="uploading-file">
+            <div
+              v-for="(file, index) in uploadingFiles"
+              :key="file.name"
+              class="file-upload-container"
+            >
+              <div class="file-name-container">
+                <span class="file-name">
                   {{ file.name }}
                 </span>
+              </div>
 
-                <div class="progress-container">
+              <div class="progress-bar-container">
+                <div class="progress">
                   <div
-                    :style="{ width: file.progress + '%' }"
-                    class="progress-bar"
+                    class="progress-bar progress-bar-striped"
+                    role="progressbar"
+                    :style="progressBarStyle(file)"
+                    :aria-valuenow="file.progress"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
                   ></div>
                 </div>
+                <font-awesome-icon
+                  v-if="file.isLabeled"
+                  :icon="['fas', 'tags']"
+                  style="color: #62aa92; margin-right: 25px"
+                />
+              </div>
 
-                <span
-                  class="cancel-icon"
-                  :style="
-                    file.isCancelled
-                      ? { color: 'lightgray', cursor: 'default' }
-                      : {}
-                  "
-                  @click="!file.isCancelled && cancelUpload(file)"
-                >
-                  x
-                </span>
+              <div :class="['cancel-icon', file.isCancelled ? 'disabled' : '']">
+                <font-awesome-icon
+                  v-if="!file.isCancelled"
+                  :icon="['fas', 'circle-xmark']"
+                  style="color: #ff0000"
+                  class="cancelable-icon"
+                  @click="cancelUpload(index)"
+                />
+                <font-awesome-icon
+                  v-else-if="file.isCancelled"
+                  :icon="['fas', 'circle-xmark']"
+                  style="color: #f49a9a"
+                  class="canceled-icon"
+                />
               </div>
             </div>
+          </div>
+          <div class="apply-upload">
             <input
               type="button"
-              value="Upload All"
+              value="upload all"
               class="primary"
               @click="uploadAll"
+              :disabled="!isAllUploaded"
+              :style="
+                !isAllUploaded
+                  ? { cursor: 'not-allowed' }
+                  : { cursor: 'pointer' }
+              "
             />
           </div>
         </div>
       </div>
-      <div class="side-space"></div>
     </div>
-    <footer class="footer">
-      <div v-if="responseMessage" class="response-message">
-        {{ responseMessage }},
-        {{ isUploading }}
-      </div>
-    </footer>
+    <div class="col"></div>
+
+    <div class="flex-2-footer"></div>
+    <ModalComponent
+      :isVisible="showModal"
+      :headerText="modalHeaderText"
+      :descriptionText="modalMessage"
+      @close="closeModalAndRefresh"
+    />
   </div>
 </template>
 
 <script>
+import ModalComponent from "../components/ModalComponent.vue";
+import axios from "axios";
 export default {
+  components: {
+    ModalComponent,
+  },
   data() {
     return {
-      responseMessage: "",
-      isUploading: false, // ตัวแปรสำหรับควบคุมการแสดง/ซ่อนส่วนต่างๆ
-      uploadingFiles: [], // สำหรับเก็บไฟล์ที่กำลังอัพโหลด
+      isUploading: false,
+      uploadingFiles: [],
+      showModal: false,
+      modalMessage: "",
+      modalHeaderText: "เกิดข้อผิดพลาด",
     };
   },
   methods: {
+    closeModalAndRefresh() {
+      this.showModal = false;
+      window.location.reload();
+    },
+    // toggleUpload() {
+    //   this.isUploading = !this.isUploading;
+    // },
     handleFileDrop(event) {
-      let files = [];
-      if (event.dataTransfer.items) {
-        for (let i = 0; i < event.dataTransfer.items.length; i++) {
-          if (event.dataTransfer.items[i].kind === "file") {
-            files.push(event.dataTransfer.items[i].getAsFile());
-          }
-        }
-      } else {
-        files = Array.from(event.dataTransfer.files);
-      }
+      const files = event.dataTransfer.items
+        ? Array.from(event.dataTransfer.items).map((item) => item.getAsFile())
+        : Array.from(event.dataTransfer.files);
       this.uploadFile(files);
     },
     triggerFileInput() {
       this.$refs.fileInput.click();
     },
-    async uploadFile(files) {
-      this.isUploading = true;
-
-      files.forEach((file) => {
-        this.uploadingFiles.push({
-          name: file.name,
-          progress: 0,
-          isCancelled: false,
-        });
-
-        // เตรียมข้อมูล formData
-        let formData = new FormData();
-        formData.append("file", file);
-
-        // ตั้งค่า progress bar เป็น 100% เมื่อเตรียมข้อมูลเสร็จ
-        const fileIndex = this.uploadingFiles.findIndex(
-          (f) => f.name === file.name
-        );
-        if (fileIndex !== -1) {
-          this.uploadingFiles[fileIndex].progress = 100;
-        }
-      });
-
-      // ไม่ต้องมีโค้ดยิง API และการจัดการ error ใดๆ
-    },
     fileInputChange(event) {
       const files = Array.from(event.target.files);
       this.uploadFile(files);
     },
-    incrementProgress(fileName) {
-      const fileIndex = this.uploadingFiles.findIndex(
-        (f) => f.name === fileName
-      );
-      if (fileIndex !== -1 && this.uploadingFiles[fileIndex].progress < 100) {
-        this.uploadingFiles[fileIndex].progress += 10; // ทุก ๆ 100ms เพิ่ม 10%
-        setTimeout(() => {
-          this.incrementProgress(fileName);
-        }, 100);
+    async uploadFile(files) {
+      try {
+        this.isUploading = true;
+
+        files.forEach((file) => {
+          const newFile = {
+            name: file.name,
+            progress: 0,
+            isCancelled: false,
+            isLabeled: false,
+            base64: null,
+          };
+          this.uploadingFiles.push(newFile);
+        });
+
+        for (let i = 0; i < this.uploadingFiles.length; i++) {
+          await this.convertToBase64(files[i], this.uploadingFiles[i]);
+          await this.simulateUpload(this.uploadingFiles[i]);
+        }
+      } catch (error) {
+        console.error("Error during upload:", error);
+        this.modalMessage =
+          "Sorry, we had trouble processing one of your files. Please try uploading again.";
+        this.modalHeaderText = "File Processing Failed 🚫";
+        this.showModal = true;
       }
     },
-    cancelUpload(file) {
-      const fileIndex = this.uploadingFiles.findIndex(
-        (f) => f.name === file.name
-      );
-      if (fileIndex !== -1) {
-        this.uploadingFiles[fileIndex].isCancelled = true;
-      }
-    },
-    uploadAll() {
-      const formData = new FormData();
 
-      // กรองไฟล์ที่ไม่ถูกยกเลิก
-      const filesToUpload = this.selectedFiles.filter(
-        (file) => !file.isCancelled
-      );
-
-      // เพิ่มไฟล์ที่จะอัพโหลดลงใน formData
-      filesToUpload.forEach((file) => {
-        formData.append("file", file);
+    simulateUpload(file) {
+      return new Promise((resolve) => {
+        const updateProgress = () => {
+          if (file.isCancelled) {
+            resolve();
+            return;
+          }
+          if (file.progress < 100) {
+            this.incrementProgress(file.name);
+            setTimeout(updateProgress, 20);
+          } else {
+            resolve();
+          }
+        };
+        updateProgress();
       });
+    },
 
-      // ทำการยิง API ที่นี่...
-      const fileNames = filesToUpload.map((file) => file.name).join(", ");
-      alert(`Files to be uploaded: ${fileNames}`);
+    convertToBase64(file, targetFileObj) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        targetFileObj.base64 = reader.result;
+      };
+      reader.onerror = (error) => {
+        console.log("Error converting to base64: ", error);
+      };
+    },
+
+    incrementProgress(fileName) {
+      const fileIndex = this.findFileIndex(fileName);
+      if (fileIndex !== -1 && this.uploadingFiles[fileIndex].progress < 100) {
+        this.uploadingFiles[fileIndex].progress += 10;
+      }
+    },
+    cancelUpload(index) {
+      this.uploadingFiles[index].isCancelled = true;
+    },
+
+    findFileIndex(fileName) {
+      return this.uploadingFiles.findIndex((f) => f.name === fileName);
+    },
+    async uploadAll() {
+      try {
+        const validFiles = this.uploadingFiles.filter(
+          (file) => !file.isCancelled && file.base64
+        );
+
+        const chunks = [];
+        for (let i = 0; i < validFiles.length; i += 10) {
+          chunks.push(validFiles.slice(i, i + 10));
+        }
+
+        for (let chunk of chunks) {
+          const base64Array = chunk.map((file) => file.base64);
+          const response = await axios.post("api/add_collection", {
+            img_file: base64Array,
+          });
+
+          if (response.status !== 200) {
+            throw new Error("Failed to upload some chunks");
+          }
+        }
+        alert("All files have been successfully uploaded!");
+      } catch (error) {
+        console.error("Error during batch upload:", error);
+        this.modalMessage =
+          "Sorry, there was a problem uploading your files. Please try again later.";
+        this.modalHeaderText = "Upload Failed 🚫";
+        this.showModal = true;
+      }
+    },
+  },
+  computed: {
+    progressBarStyle() {
+      return (file) => {
+        let baseStyle = `width: ${file.progress}%`;
+        if (file.isCancelled) {
+          return `${baseStyle}; background-color: red`;
+        } else if (file.progress === 100) {
+          return `${baseStyle}; background-color: green`;
+        }
+        return baseStyle;
+      };
+    },
+    isAllUploaded() {
+      return this.uploadingFiles.every(
+        (file) => file.progress === 100 || file.isCancelled
+      );
     },
   },
 };

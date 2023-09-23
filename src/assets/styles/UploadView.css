@@ -1,48 +1,15 @@
-/* Base Styles */
-/* .upload-view {
-  display: grid;
-  grid-template-rows: 100px 1fr 100px;
-  grid-template-columns: 1fr 3fr 1fr;
-  height: 92vh;
-}
-
-.logo-header,
-.footer {
-  grid-column: 1 / -1;
-  height: 100px;
-  display: flex;
-  align-items: center;
-}
-
-.logo-header {
-  justify-content: flex-start;
-  padding-left: 250px;
-}
-
-.footer {
-  padding: 10px 0;
-}
-
-.content {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
-  min-height: 460px;
-  overflow: auto;
-}
-
-.drop-area {
-  min-height: 300px;
-  width: 100%;
-  border: 2px dashed #ccc;
-  border-radius: 10px;
-  padding: 20px;
-  text-align: center;
+.cancelable-icon {
   cursor: pointer;
-} */
+}
 
-/* Typography */
-/* .fa-icon {
+.canceled-icon {
+  cursor: not-allowed;
+}
+
+.p-margin {
+  margin-top: 35px;
+}
+.fa-icon {
   font-size: 50px;
   margin-right: 20px;
 }
@@ -95,94 +62,142 @@
 .or-line::after {
   right: 0;
   margin-right: -50px;
-} */
-
-/* Buttons */
-/* .primary {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
 }
-
-.p-margin {
-  margin-top: 35px;
-} */
-
-/* Media Queries */
-/* @media (max-height: 600px) {
-  .drop-area {
-    min-height: 200px;
-    grid-column: 1;
-  }
-}
-
-@media (max-width: 768px) {
-  .logo-header {
-    padding-left: 20px;
-  }
-  .content {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 480px) {
-  .logo-header {
-    padding-left: 10px;
-  }
-} */
-
-/*/////////////////////////////////////////////////////////////////  */
-/* 
-.upload-section {
-  padding-left: 10px;
-}
-
-.upload-text {
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.file-upload-container {
+.file-name-container {
+  grid-column: 1;
+  /* background-color: chartreuse; */
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
+  justify-content: start;
+  margin-left: 5px;
+  overflow: hidden; /* ตัดเนื้อหาที่เกินขอบภายในของ element ทิ้ง */
 }
-
 .file-name {
-  flex: 1;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  overflow: hidden; /* ตัดเนื้อหาที่เกินขอบภายในของ element ทิ้ง */
+  text-overflow: ellipsis; /* ใช้ ... สำหรับเนื้อหาที่ถูกตัด */
+  white-space: nowrap; /* ป้องกันข้อความไม่ให้ขึ้นบรรทัดใหม่ */
 }
-
-.progress-container {
-  flex: 2;
-  height: 10px;
-  background: #d6d6d6;
-  margin: 0 10px;
+.progress-bar-container {
+  grid-column: 2;
+  /* background-color: darkgoldenrod; */
+  display: flex;
+  width: 100%;
 }
-
-.progress-bar {
-  height: 100%;
-  background: green;
-  transition: width 0.3s;
+.progress {
+  margin-left: 5px;
+  width: 95%; /* ความยาวคงที่ของ progress bar */
+  /* background-color: #c9baba; */
 }
 
 .cancel-icon {
-  cursor: pointer;
-  padding: 5px;
-  background: red;
-  color: white;
-  border-radius: 50%;
+  grid-column: 3;
+  /* background-color: hotpink; */
+}
+.uploading-file {
+  /* background-color: cornsilk; */
+  overflow-y: auto;
+  height: 85%;
+}
+.file-upload-container {
+  align-items: center;
+  display: grid;
+  grid-template-columns: 3fr 8fr 1fr;
 }
 
-.cancel-icon[disabled] {
-  cursor: not-allowed;
-  background-color: lightgray;
-  pointer-events: none;
-} */
+h1 {
+  font-size: 32px; /* ตั้งค่า font-size สำหรับ h1 เป็น 32px และจะไม่เปลี่ยนเมื่อย่อหน้า */
+}
+
+.drop-message-unupload {
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* ครอบพื้นที่ทั้งหมดใน col-6.bg-info */
+}
+.drop-area {
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* ครอบพื้นที่ทั้งหมดใน col-6.bg-info */
+  background-color: aliceblue;
+  border: 2px dashed #ccc;
+  border-radius: 10px;
+  padding: 20px;
+  width: 100%;
+  min-height: 300px;
+  text-align: center;
+}
+.drop-message-isupload {
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* ครอบพื้นที่ทั้งหมดใน col-6.bg-info */
+  /* background-color: black; */
+  height: 100%;
+  grid-template-rows: minmax(80px, auto) 6fr minmax(80px, auto);
+}
+.bold-text-upload {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.bold-text-drop {
+  font-weight: bold;
+  font-size: 25px;
+}
+.drop-text {
+  flex: 1;
+  /* background-color: aquamarine; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.upload-text {
+  flex: 1;
+  /* background-color: blueviolet; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 5%;
+}
+
+.drop-area-content {
+  flex: 6;
+  /* background-color: bisque; */
+}
+
+.apply-upload {
+  flex: 1;
+  /* background-color: brown; */
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  height: 10%;
+}
+.grid-container {
+  display: grid;
+  grid-template-rows: minmax(80px, auto) 1fr minmax(80px, auto);
+  grid-template-columns: minmax(0, 2fr) minmax(440px, 6fr) minmax(0, 2fr);
+  height: calc(100vh - 42px);
+  background-color: aliceblue;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.flex-2-head {
+  grid-column: 2 / span 3;
+  display: flex;
+  gap: 1rem; /* ระยะห่างระหว่าง content ในแนวแกน X */
+  padding-left: 10px;
+  align-items: center;
+}
+
+.col-6-upload {
+  grid-column: 2;
+  min-width: 500px;
+  width: auto;
+  min-height: 400px;
+  display: flex; /* ตั้งค่าให้แสดงผลแบบ flexbox */
+  flex-direction: column; /* กำหนดให้ flex items วางตัวแบบแนวตั้ง */
+}
+
+.flex-2-footer {
+  grid-column: 1 / span 3;
+}

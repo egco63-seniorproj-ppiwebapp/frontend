@@ -26,11 +26,6 @@ const routes: Array<RouteRecordRaw> = [
     name: "settings",
     component: SettingsView,
   },
-  {
-    path: "/test",
-    name: "test",
-    component: testView,
-  },
   // {
   //   path: "/settings",
   //   name: "settings",

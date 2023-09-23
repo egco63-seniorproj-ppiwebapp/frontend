@@ -1,6 +1,6 @@
 <template>
   <div v-if="isVisible" class="modal-overlay">
-    <div class="modal">
+    <div class="modal-container">
       <div class="modal-header">
         <h3>{{ headerText }}</h3>
       </div>
@@ -42,7 +42,7 @@ export default {
   align-items: center;
 }
 
-.modal {
+.modal-container {
   background: white;
   width: 80%;
   max-width: 500px;

@@ -7,6 +7,7 @@
       <ImageGrid :images="images" />
     </div>
   </div>
+  <router-view />
 </template>
 
 <style lang="sass" scoped>

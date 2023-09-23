@@ -1,5 +1,5 @@
 <template>
-  <div class="thumbnail" tabindex="0">
+  <div class="thumbnail" tabindex="0" @click="onClick">
     <div class="image-wrapper">
       <img :src="img" @error="setErrorImg" draggable="false" />
       <div class="taglist">
@@ -13,9 +13,10 @@
 </template>
 
 <script lang="ts">
+import router from "@/router";
 import { defineComponent, PropType } from "vue";
 
-const errorImage = "foot.png";
+const errorImage = "/foot.png";
 
 export default defineComponent({
   name: "ImageThumbnail",
@@ -32,6 +33,10 @@ export default defineComponent({
       type: String,
       default: errorImage,
     },
+    imgid: {
+      type: String,
+      required: true,
+    },
   },
   methods: {
     setErrorImg(e: Event) {
@@ -40,6 +45,9 @@ export default defineComponent({
     },
     sortTags(tags: string[]) {
       return tags.map((a) => a).sort();
+    },
+    onClick() {
+      router.push(`/images/label/${this.imgid}`);
     },
   },
 });

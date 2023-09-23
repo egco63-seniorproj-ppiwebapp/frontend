@@ -6,6 +6,7 @@
       :name="img.name"
       :tags="img.tags"
       :img="img.img"
+      :imgid="index.toString()"
     />
   </div>
 </template>

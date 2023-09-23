@@ -3,6 +3,7 @@ import HomeView from "@/views/HomeView.vue";
 import UploadView from "@/views/UploadView.vue";
 import ImagesView from "@/views/ImagesView.vue";
 import SettingsView from "@/views/SettingsView.vue";
+import LabelView from "@/views/LabelView.vue";
 import NavBar from "@/components/NavBar.vue";
 
 const lazyLoad = (view: string) => () => import(`@/views/${view}.vue`);
@@ -33,7 +34,18 @@ const routes: Array<RouteRecordRaw> = [
       default: ImagesView,
       NavBar,
     },
+    children: [
+      {
+        path: "label/:imgid",
+        name: "label",
+        component: LabelView,
+      },
+    ],
     meta: { title: "Images" },
+  },
+  {
+    path: "/images/label",
+    redirect: { name: "images" },
   },
   {
     path: "/settings",

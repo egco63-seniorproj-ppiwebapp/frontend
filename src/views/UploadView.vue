@@ -294,6 +294,6 @@ export default {
 };
 </script>
 
-<style scoped>
-@import "../assets/styles/UploadView.css";
+<style lang="scss" scoped>
+@import "@/assets/styles/UploadView.scss";
 </style>

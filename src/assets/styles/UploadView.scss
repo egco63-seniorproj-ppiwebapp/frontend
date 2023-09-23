@@ -172,6 +172,8 @@ h1 {
   height: 10%;
 }
 .grid-container {
+  
+  @import "bootstrap/scss/bootstrap.scss";
   display: grid;
   grid-template-rows: minmax(80px, auto) 1fr minmax(80px, auto);
   grid-template-columns: minmax(0, 2fr) minmax(440px, 6fr) minmax(0, 2fr);

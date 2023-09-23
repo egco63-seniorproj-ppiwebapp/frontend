@@ -3,7 +3,6 @@ import HomeView from "@/views/HomeView.vue";
 import UploadView from "@/views/UploadView.vue";
 import ImagesView from "@/views/ImagesView.vue";
 import SettingsView from "@/views/SettingsView.vue";
-import testView from "@/views/testView.vue";
 import LabelView from "@/views/LabelView.vue";
 import NavBar from "@/components/NavBar.vue";
 

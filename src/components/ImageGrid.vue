@@ -13,12 +13,7 @@
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
 import ImageThumbnail from "./ImageThumbnail.vue";
-
-export type ImageData = {
-  name: string;
-  tags: string[];
-  img: string;
-};
+import { ImageData } from "@/types";
 
 export default defineComponent({
   name: "ImageGrid",

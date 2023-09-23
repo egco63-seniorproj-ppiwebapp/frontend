@@ -222,7 +222,8 @@ export default {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => {
-        targetFileObj.base64 = reader.result;
+        targetFileObj.base64 = reader.result.split(",")[1];
+        console.log(targetFileObj.base64);
       };
       reader.onerror = (error) => {
         console.log("Error converting to base64: ", error);
@@ -264,6 +265,7 @@ export default {
           }
         }
         alert("All files have been successfully uploaded!");
+        window.location.reload();
       } catch (error) {
         console.error("Error during batch upload:", error);
         this.modalMessage =

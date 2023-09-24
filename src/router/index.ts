@@ -2,7 +2,8 @@ import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import HomeView from "@/views/HomeView.vue";
 import UploadView from "@/views/UploadView.vue";
 import ImagesView from "@/views/ImagesView.vue";
-import SettingsView from "@/views/SettingsView.vue";
+import LabelView from "@/views/LabelView.vue";
+import DiagnoseView from "@/views/DiagnoseView.vue";
 import ImageDetailView from "@/views/ImageDetailView.vue";
 import NavBar from "@/components/NavBar.vue";
 import { useStore } from "vuex";
@@ -46,17 +47,26 @@ const routes: Array<RouteRecordRaw> = [
     meta: { title: "Images", authRequired: true },
   },
   {
-    path: "/images/label",
+    path: "/images/id",
     redirect: { name: "images" },
   },
   {
-    path: "/settings",
-    name: "settings",
+    path: "/label",
+    name: "label",
     components: {
-      default: SettingsView,
+      default: LabelView,
       NavBar,
     },
-    meta: { title: "Settings", authRequired: true },
+    meta: { title: "Label", authRequired: true },
+  },
+  {
+    path: "/diagnose",
+    name: "diagnose",
+    components: {
+      default: DiagnoseView,
+      NavBar,
+    },
+    meta: { title: "DiagnoseView", authRequired: true },
   },
   {
     path: "/login",

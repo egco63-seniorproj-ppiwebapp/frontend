@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import axios from "axios";
+import { AuthData } from "@/types";
 import { defineComponent } from "vue";
 
 export default defineComponent({
@@ -34,14 +34,16 @@ export default defineComponent({
   methods: {
     async onSubmit(e: Event) {
       e.preventDefault();
-      let authdata = { username: this.username, password: this.password };
-      console.log(authdata);
-      let res = await axios.post("api/auth", authdata);
-      if (res.status != 200) {
-        alert("Incorrect username or password");
-      } else {
+      let authdata: AuthData = {
+        username: this.username,
+        password: this.password,
+      };
+      let isSuccess = await this.$store.dispatch("login", authdata);
+      if (isSuccess) {
         alert("Logged on!");
         this.$router.push("/");
+      } else {
+        alert("Incorrect username or password");
       }
     },
   },

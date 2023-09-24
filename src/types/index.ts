@@ -11,3 +11,8 @@ export interface SearchParameters {
   footside: string;
   footlabel: string;
 }
+
+export interface AuthData {
+  username: string;
+  password: string;
+}

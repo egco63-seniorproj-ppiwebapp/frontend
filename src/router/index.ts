@@ -5,6 +5,8 @@ import ImagesView from "@/views/ImagesView.vue";
 import SettingsView from "@/views/SettingsView.vue";
 import LabelView from "@/views/LabelView.vue";
 import NavBar from "@/components/NavBar.vue";
+import { useStore } from "vuex";
+import { key } from "@/store";
 
 const lazyLoad = (view: string) => () => import(`@/views/${view}.vue`);
 
@@ -16,7 +18,7 @@ const routes: Array<RouteRecordRaw> = [
       default: HomeView,
       NavBar,
     },
-    meta: { title: "Home" },
+    meta: { title: "Home", authRequired: true },
   },
   {
     path: "/upload",
@@ -25,7 +27,7 @@ const routes: Array<RouteRecordRaw> = [
       default: UploadView,
       NavBar,
     },
-    meta: { title: "Upload" },
+    meta: { title: "Upload", authRequired: true },
   },
   {
     path: "/images",
@@ -41,7 +43,7 @@ const routes: Array<RouteRecordRaw> = [
         component: LabelView,
       },
     ],
-    meta: { title: "Images" },
+    meta: { title: "Images", authRequired: true },
   },
   {
     path: "/images/label",
@@ -54,13 +56,13 @@ const routes: Array<RouteRecordRaw> = [
       default: SettingsView,
       NavBar,
     },
-    meta: { title: "Settings" },
+    meta: { title: "Settings", authRequired: true },
   },
   {
     path: "/login",
     name: "login",
     component: lazyLoad("LoginView"),
-    meta: { title: "Login" },
+    meta: { title: "Login", authRequired: true },
   },
   {
     path: "/:pathMatch(.*)*",
@@ -76,12 +78,26 @@ const router = createRouter({
 declare module "vue-router" {
   interface RouteMeta {
     title?: string;
+    authRequired?: boolean;
   }
 }
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const title = to.meta.title;
   if (title) document.title = `WebApp - ${title}`;
+
+  const store = useStore(key);
+
+  if (to.meta.authRequired && !store.getters.isAuthenticated) {
+    const hasSession = await store.dispatch("session");
+    if (hasSession) {
+      if (to.path == "/login") return next("/");
+      return next();
+    }
+    if (to.path == "/login") return next();
+    return next("/login");
+  }
+
   next();
 });
 

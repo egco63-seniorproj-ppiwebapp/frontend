@@ -119,11 +119,13 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { ImageData } from "@/types";
+import { ImageThumbnailData, ImageMetadata } from "@/types";
+import { parseImageMetadata } from "@/utils";
 import RadioButton from "@/components/RadioButton.vue";
 
-import images from "@/assets/images.json";
+// import images from "@/assets/images.json";
 import router from "@/router";
+import axios from "axios";
 
 const errorImage = "/foot.png";
 
@@ -133,25 +135,31 @@ export default defineComponent({
     RadioButton,
   },
   data: () => ({
-    imgdata: {} as ImageData,
+    imgdata: {} as ImageThumbnailData,
   }),
   created() {
     this.$watch(
       () => this.$route.params,
-      () => {
-        this.load();
+      async () => {
+        await this.load();
       },
       { immediate: true }
     );
   },
   methods: {
-    load() {
+    async load() {
       let imgid = Number(this.$route.params.imgid);
-      if (imgid >= images.length) {
-        this.closeWindow();
-        return;
-      }
-      this.imgdata = images[imgid];
+
+      if (!imgid) return;
+
+      let res = await axios.get(`/api/get_collection/${imgid}`);
+      if (res.status != 200) return;
+
+      const imgMetaList = res.data as Array<ImageMetadata>;
+
+      if (imgMetaList.length <= 0) return this.closeWindow();
+
+      this.imgdata = parseImageMetadata(imgMetaList[0]);
     },
     setErrorImg(e: Event) {
       const el = e.target as HTMLImageElement;

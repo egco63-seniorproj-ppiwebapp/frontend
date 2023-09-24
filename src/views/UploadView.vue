@@ -185,12 +185,42 @@ export default {
     };
   },
   methods: {
+    async isFileOfType(file, type) {
+      const sliceSize = 4;
+      const slice = file.slice(0, sliceSize);
+
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = (e) => {
+          const bytes = new Uint8Array(e.target.result);
+
+          if (type === "jpg" && bytes[0] === 0xff && bytes[1] === 0xd8) {
+            resolve(true);
+          } else if (
+            type === "png" &&
+            bytes[0] === 0x89 &&
+            bytes[1] === 0x50 &&
+            bytes[2] === 0x4e &&
+            bytes[3] === 0x47
+          ) {
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        };
+        reader.readAsArrayBuffer(slice);
+      });
+    },
     updateTotalFiles(files) {
       this.totalFiles = files.length;
     },
-    isValidFile(file) {
-      const validExtensions = ["image/jpeg", "image/jpg", "image/png"];
-      return validExtensions.includes(file.type);
+    async isValidFile(file) {
+      const validTypes = ["jpg", "png"];
+      for (let type of validTypes) {
+        const isValid = await this.isFileOfType(file, type);
+        if (isValid) return true;
+      }
+      return false;
     },
     closeModalAndRefresh() {
       window.location.reload();
@@ -206,24 +236,28 @@ export default {
       if (this.fileUploaded) {
         return;
       }
-
-      let files = event.dataTransfer.items
+      const files = event.dataTransfer.items
         ? Array.from(event.dataTransfer.items).map((item) => item.getAsFile())
         : Array.from(event.dataTransfer.files);
 
-      const originalFileCount = files.length;
-      files = files.filter(this.isValidFile);
+      const validationPromises = files.map((file) => this.isValidFile(file));
 
-      if (files.length < originalFileCount) {
-        this.modalMessage =
-          "The files you attempted to upload contain unsupported formats. Only .jpg, .jpeg, and .png files are allowed.<br><br> Please check your selection and try again.";
-        this.modalHeaderText = "Unsupported File Format";
-        this.showModal = true;
-        return;
-      }
+      Promise.all(validationPromises).then((validationResults) => {
+        const invalidFiles = validationResults.filter(
+          (result) => !result
+        ).length;
 
-      this.uploadFile(files);
-      this.fileUploaded = true;
+        if (invalidFiles > 0) {
+          this.modalMessage =
+            "The files you attempted to upload contain unsupported formats. Only .jpg, .jpeg, and .png files are allowed.<br><br> Please check your selection and try again.";
+          this.modalHeaderText = "Unsupported File Format";
+          this.showModal = true;
+          return;
+        }
+
+        this.uploadFile(files);
+        this.fileUploaded = true;
+      });
     },
 
     triggerFileInput() {
@@ -233,19 +267,30 @@ export default {
       if (this.fileUploaded) {
         return;
       }
-      const files = Array.from(event.target.files).filter(this.isValidFile);
 
-      if (files.length !== event.target.files.length) {
-        this.modalMessage =
-          "The files you attempted to upload contain unsupported formats. Only .jpg, .jpeg, and .png files are allowed.<br><br> Please check your selection and try again.";
-        this.modalHeaderText = "Unsupported File Format";
-        this.showModal = true;
-      }
+      const files = Array.from(event.target.files);
+      const originalFileCount = files.length;
+      const validationPromises = files.map((file) => this.isValidFile(file));
 
-      if (files.length > 0) {
-        this.uploadFile(files);
-      }
-      this.fileUploaded = true;
+      Promise.all(validationPromises).then((validationResults) => {
+        for (let i = validationResults.length - 1; i >= 0; i--) {
+          if (!validationResults[i]) files.splice(i, 1);
+        }
+
+        if (files.length !== originalFileCount) {
+          this.modalMessage =
+            "The files you attempted to upload contain unsupported formats. Only .jpg, .jpeg, and .png files are allowed.<br><br> Please check your selection and try again.";
+          this.modalHeaderText = "Unsupported File Format";
+          this.showModal = true;
+          return;
+        }
+
+        if (files.length > 0) {
+          this.uploadFile(files);
+        }
+
+        this.fileUploaded = true;
+      });
     },
     async uploadFile(files) {
       try {

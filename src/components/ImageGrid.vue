@@ -6,7 +6,7 @@
       :name="img.name"
       :tags="img.tags"
       :img="img.img"
-      :imgid="index.toString()"
+      :imgid="img.id"
     />
   </div>
 </template>
@@ -14,14 +14,14 @@
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
 import ImageThumbnail from "./ImageThumbnail.vue";
-import { ImageData } from "@/types";
+import { ImageThumbnailData } from "@/types";
 
 export default defineComponent({
   name: "ImageGrid",
   components: { ImageThumbnail },
   props: {
     images: {
-      type: Object as PropType<ImageData[]>,
+      type: Object as PropType<ImageThumbnailData[]>,
       required: true,
     },
   },

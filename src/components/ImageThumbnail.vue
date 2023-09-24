@@ -34,7 +34,7 @@ export default defineComponent({
       default: errorImage,
     },
     imgid: {
-      type: String,
+      type: Number,
       required: true,
     },
   },
@@ -47,7 +47,7 @@ export default defineComponent({
       return tags.map((a) => a).sort();
     },
     onClick() {
-      router.push(`/images/label/${this.imgid}`);
+      router.push(`/images/id/${this.imgid}`);
     },
   },
 });

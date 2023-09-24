@@ -356,16 +356,15 @@ export default {
 
         this.progressPerChunk = 100 / chunks.length;
 
-        let totalResponses = 0; // สำหรับเช็คจำนวนการยิง API
-        let singleID = null; // สำหรับเก็บ ID ในกรณีที่มี ID เดียว
+        let totalResponses = 0;
+        let singleID = null;
 
         for (let chunk of chunks) {
           const targetProgress = this.uploadProgress + this.progressPerChunk;
 
-          const response = await axios.post(
-            "http://127.0.0.1:8000/api/add_collection",
-            { img_file: chunk }
-          );
+          const response = await axios.post("api/add_collection", {
+            img_file: chunk,
+          });
 
           if (response.status !== 200) {
             throw new Error("Failed to upload some chunks");
@@ -393,6 +392,7 @@ export default {
         this.modalMessage =
           "Sorry, there was a problem uploading your files. Please try again later.";
         this.modalHeaderText = "Upload Failed 🚫";
+        this.isUploadingAll = false;
         this.showModalreload = true;
       } finally {
         setTimeout(() => {
@@ -401,15 +401,15 @@ export default {
       }
     },
     smoothProgress(target) {
-      const step = 1; // ค่าที่จะเพิ่มทุกครั้งที่อัพเดท
-      const interval = 20; // ความถี่ในการอัพเดท (มิลลิวินาที)
+      const step = 1;
+      const interval = 20;
 
       let currentProgress = this.uploadProgress;
 
       const progressInterval = setInterval(() => {
         if (currentProgress < target) {
           currentProgress += step;
-          if (currentProgress > target) currentProgress = target; // ป้องกันไม่ให้เกินค่าเป้าหมาย
+          if (currentProgress > target) currentProgress = target;
           this.uploadProgressBar = currentProgress;
         } else {
           clearInterval(progressInterval);

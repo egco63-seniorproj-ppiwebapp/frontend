@@ -1,7 +1,7 @@
 <template>
   <div v-if="isVisible" class="modal-overlay">
     <div class="modal-content">
-      <h2>{{ headerText }}</h2>
+      <h5>{{ headerText }}</h5>
       <div
         class="progress-bar progress-bar-striped"
         role="progressbar"
@@ -10,7 +10,7 @@
         aria-valuemin="0"
         aria-valuemax="100"
       ></div>
-      <p>{{ progress }}%</p>
+      <p style="margin-top: 5px">{{ progress }}%</p>
     </div>
   </div>
 </template>
@@ -37,7 +37,7 @@ export default {
       if (this.progress === 100) {
         return `${baseStyle} background-color: green;`;
       }
-      return baseStyle;
+      return `${baseStyle} background-color: #6699CC;`;
     },
   },
 };
@@ -45,7 +45,6 @@ export default {
 
 <style lang="scss" scoped>
 .modal-overlay {
-  @import "bootstrap/scss/bootstrap.scss";
   position: fixed;
   top: 0;
   left: 0;
@@ -58,6 +57,7 @@ export default {
 }
 
 .modal-content {
+  @import "bootstrap/scss/bootstrap.scss";
   background: #ffffff;
   padding: 20px;
   border-radius: 10px;

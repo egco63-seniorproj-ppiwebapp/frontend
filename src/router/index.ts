@@ -29,15 +29,6 @@ const routes: Array<RouteRecordRaw> = [
     meta: { title: "Upload" },
   },
   {
-    path: "/test",
-    name: "test",
-    components: {
-      default: TestView,
-      NavBar,
-    },
-    meta: { title: "Test" },
-  },
-  {
     path: "/images",
     name: "images",
     components: {

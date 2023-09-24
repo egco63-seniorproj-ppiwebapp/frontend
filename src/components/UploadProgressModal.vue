@@ -43,9 +43,9 @@ export default {
 };
 </script>
 
-<style scoped>
-/* @import "bootstrap/scss/bootstrap.scss"; */
+<style lang="scss" scoped>
 .modal-overlay {
+  @import "bootstrap/scss/bootstrap.scss";
   position: fixed;
   top: 0;
   left: 0;

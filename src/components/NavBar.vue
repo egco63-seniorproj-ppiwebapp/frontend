@@ -1,10 +1,23 @@
 <template>
   <nav>
     <div class="nav-links">
-      <router-link to="/">Home</router-link>
-      <router-link to="/upload">Upload</router-link>
-      <router-link to="/images">Images</router-link>
-      <router-link to="/settings">Settings</router-link>
+      <router-link to="/"
+        ><font-awesome-icon :icon="['fas', 'fa-home']" /> Home</router-link
+      >
+      <router-link to="/upload"
+        ><font-awesome-icon :icon="['fas', 'fa-file-upload']" />
+        Upload</router-link
+      >
+      <router-link to="/images"
+        ><font-awesome-icon :icon="['fas', 'fa-images']" /> Gallery</router-link
+      >
+      <router-link to="/label"
+        ><font-awesome-icon :icon="['fas', 'fa-tag']" /> Label</router-link
+      >
+      <router-link to="/diagnose"
+        ><font-awesome-icon :icon="['fas', 'fa-stethoscope']" />
+        Diagnose</router-link
+      >
     </div>
 
     <div class="user-profile">
@@ -37,6 +50,8 @@ export default defineComponent({
 </script>
 
 <style lang="sass" scoped>
+@use '@/assets/styles/base'
+
 nav
   display: flex
   justify-content: space-between
@@ -69,9 +84,10 @@ nav
   color: white
   border-radius: 50%
   background: none
-  outline-color: rgba(255, 255, 255, 0.2)
+  outline-color: rgba(255, 255, 255, 0.5)
 
   &:hover
-    background: rgba(255, 255, 255,0.2)
+    background: rgba(255, 255, 255,0.5)
     box-shadow: 0 0 24px -5px rgba(0, 0, 0, 0.04)
+    color: base.$default-font-color
 </style>

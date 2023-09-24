@@ -7,14 +7,14 @@
         :style="{ color: '#62aa92' }"
       />
       <h1>Import your Image Files</h1>
-      <input
+      <!-- <input
         type="button"
         value="switch event"
         class="primary"
         @click="toggleUpload"
       />
       uploadProgress {{ uploadProgress }} progressPerChunk
-      {{ progressPerChunk }}
+      {{ progressPerChunk }} -->
     </div>
     <div class="col"></div>
     <div class="col-6-upload">
@@ -122,7 +122,9 @@
               value="upload all"
               class="primary"
               @click="uploadAll"
-              :disabled="allFilesCancelled || !isAllUploaded || isUploadingAll"
+              :disabled="
+                checkAllFilesCancelled() || !isAllUploaded || isUploadingAll
+              "
               :style="
                 allFilesCancelled || !isAllUploaded || isUploadingAll
                   ? { cursor: 'not-allowed' }
@@ -137,10 +139,16 @@
 
     <div class="flex-2-footer"></div>
     <ModalComponent
-      :isVisible="showModal"
+      :isVisible="showModalreload"
       :headerText="modalHeaderText"
       :descriptionText="modalMessage"
       @close="closeModalAndRefresh"
+    />
+    <ModalComponent
+      :isVisible="showModal"
+      :headerText="modalHeaderText"
+      :descriptionText="modalMessage"
+      @close="closeModal"
     />
     <UploadProgressModal
       :isVisible="isUploadingAll"
@@ -163,6 +171,7 @@ export default {
     return {
       isUploading: false,
       uploadingFiles: [],
+      showModalreload: false,
       showModal: false,
       modalMessage: "",
       modalHeaderText: "เกิดข้อผิดพลาด",
@@ -184,12 +193,10 @@ export default {
       return validExtensions.includes(file.type);
     },
     closeModalAndRefresh() {
-      if (this.modalAction) {
-        this.modalAction();
-        this.modalAction = null;
-      } else {
-        window.location.reload();
-      }
+      window.location.reload();
+    },
+    closeModal() {
+      this.showModal = false;
     },
 
     toggleUpload() {
@@ -212,9 +219,6 @@ export default {
           "The files you attempted to upload contain unsupported formats. Only .jpg, .jpeg, and .png files are allowed.<br><br> Please check your selection and try again.";
         this.modalHeaderText = "Unsupported File Format";
         this.showModal = true;
-        this.modalAction = () => {
-          this.showModal = false;
-        };
         return;
       }
 
@@ -236,9 +240,6 @@ export default {
           "The files you attempted to upload contain unsupported formats. Only .jpg, .jpeg, and .png files are allowed.<br><br> Please check your selection and try again.";
         this.modalHeaderText = "Unsupported File Format";
         this.showModal = true;
-        this.modalAction = () => {
-          this.showModal = false;
-        };
       }
 
       if (files.length > 0) {
@@ -261,7 +262,6 @@ export default {
           this.uploadingFiles.push(newFile);
         });
 
-        // เพิ่มบรรทัดนี้
         this.totalFiles = this.uploadingFiles.length;
 
         for (let i = 0; i < this.uploadingFiles.length; i++) {
@@ -273,7 +273,7 @@ export default {
         this.modalMessage =
           "Sorry, we had trouble processing one of your files. Please try uploading again.";
         this.modalHeaderText = "File Processing Failed 🚫";
-        this.showModal = true;
+        this.showModalreload = true;
       }
     },
 
@@ -393,7 +393,7 @@ export default {
         this.modalMessage =
           "Sorry, there was a problem uploading your files. Please try again later.";
         this.modalHeaderText = "Upload Failed 🚫";
-        this.showModal = true;
+        this.showModalreload = true;
       } finally {
         setTimeout(() => {
           this.isUploadingAll = false;
@@ -416,6 +416,17 @@ export default {
         }
       }, interval);
     },
+    checkAllFilesCancelled() {
+      if (this.uploadingFiles.every((file) => file.isCancelled)) {
+        this.modalHeaderText = "Cancel Upload";
+        this.modalMessage =
+          "You have canceled the upload of all files. Please press OK to reload the page.";
+        this.showModalreload = true;
+        this.modalAction = this.closeModalAndRefresh;
+        return true;
+      }
+      return false;
+    },
   },
   computed: {
     progressBarStyle() {
@@ -433,9 +444,6 @@ export default {
       return this.uploadingFiles.every(
         (file) => file.progress === 100 || file.isCancelled
       );
-    },
-    allFilesCancelled() {
-      return this.uploadingFiles.every((file) => file.isCancelled);
     },
   },
 };

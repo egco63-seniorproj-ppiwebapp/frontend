@@ -18,25 +18,23 @@
   </nav>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  name: "NavBar",
   methods: {
     logOut() {
       console.log("pls implement function to me");
     },
   },
-};
+});
 </script>
 
 <style scoped>
 nav {
   display: flex;
   justify-content: space-between;
-}
-
-.nav-links {
-  display: flex;
-  gap: 20px;
 }
 
 .user-profile {
@@ -46,7 +44,6 @@ nav {
 }
 
 .user-name {
-  font-family: "Arial";
   font-weight: 400;
   font-size: 16px;
   color: #ffffff;

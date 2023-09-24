@@ -5,6 +5,7 @@ import ImagesView from "@/views/ImagesView.vue";
 import SettingsView from "@/views/SettingsView.vue";
 import LabelView from "@/views/LabelView.vue";
 import NavBar from "@/components/NavBar.vue";
+import TestView from "@/views/TestView.vue";
 
 const lazyLoad = (view: string) => () => import(`@/views/${view}.vue`);
 
@@ -26,6 +27,15 @@ const routes: Array<RouteRecordRaw> = [
       NavBar,
     },
     meta: { title: "Upload" },
+  },
+  {
+    path: "/test",
+    name: "test",
+    components: {
+      default: TestView,
+      NavBar,
+    },
+    meta: { title: "Test" },
   },
   {
     path: "/images",

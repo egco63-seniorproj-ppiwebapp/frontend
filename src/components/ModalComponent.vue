@@ -5,7 +5,7 @@
         <h3>{{ headerText }}</h3>
       </div>
       <div class="modal-body">
-        <p>{{ descriptionText }}</p>
+        <p v-html="descriptionText"></p>
       </div>
       <div class="modal-footer">
         <input type="button" value="OK" class="primary" @click="closeModal" />
@@ -72,7 +72,7 @@ export default {
 
 .modal-body {
   padding: 20px;
-  text-align: center;
+  text-align: left; /* ปรับจาก center เป็น left */
 }
 
 .modal-footer {

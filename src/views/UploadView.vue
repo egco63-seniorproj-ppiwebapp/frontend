@@ -6,20 +6,22 @@
         icon="folder-plus"
         :style="{ color: '#62aa92' }"
       />
-      <h1>Import your File or Folder</h1>
-      <!-- <input
+      <h1>Import your Image Files</h1>
+      <input
         type="button"
         value="switch event"
         class="primary"
-        @click="clickswitch"
-      /> -->
+        @click="toggleUpload"
+      />
+      uploadProgress {{ uploadProgress }} progressPerChunk
+      {{ progressPerChunk }}
     </div>
     <div class="col"></div>
     <div class="col-6-upload">
       <div class="drop-area" @dragover.prevent @drop.prevent="handleFileDrop">
         <div class="drop-message-unupload" v-if="!isUploading">
           <div class="drop-text">
-            <span class="bold-text-drop">Drop your file or Folder here</span>
+            <span class="bold-text-drop">Drop your Image files here</span>
           </div>
           <div class="drop-area-content">
             <p class="p-margin">
@@ -30,9 +32,9 @@
               />
             </p>
             <p class="p-margin">
-              <span class="gray-text">and </span>
-              <span class="underline">other similar</span>
-              <span class="gray-text"> file types</span>
+              <span class="gray-text">Image file type .jpeg, .jpg, .png </span>
+              <!-- <span class="underline">other similar</span>
+              <span class="gray-text"> file types</span> -->
             </p>
             <p class="p-margin">
               <span class="or-line">or</span>
@@ -48,7 +50,7 @@
               />
               <input
                 type="button"
-                value="Import File or Folder.."
+                value="Import Files"
                 class="primary"
                 @click="triggerFileInput"
               />
@@ -59,6 +61,11 @@
           <div class="upload-text">
             <span class="bold-text-upload">uploading....</span>
           </div>
+          <div class="file-info">
+            <span style="font-size: 16px; font-family: Arial, sans-serif"
+              >Total files: {{ totalFiles }}</span
+            >
+          </div>
           <div class="uploading-file">
             <div
               v-for="(file, index) in uploadingFiles"
@@ -66,7 +73,10 @@
               class="file-upload-container"
             >
               <div class="file-name-container">
-                <span class="file-name">
+                <span
+                  class="file-name"
+                  style="font-size: 16px; font-family: Arial, sans-serif"
+                >
                   {{ file.name }}
                 </span>
               </div>
@@ -112,9 +122,9 @@
               value="upload all"
               class="primary"
               @click="uploadAll"
-              :disabled="!isAllUploaded"
+              :disabled="allFilesCancelled || !isAllUploaded || isUploadingAll"
               :style="
-                !isAllUploaded
+                allFilesCancelled || !isAllUploaded || isUploadingAll
                   ? { cursor: 'not-allowed' }
                   : { cursor: 'pointer' }
               "
@@ -132,15 +142,22 @@
       :descriptionText="modalMessage"
       @close="closeModalAndRefresh"
     />
+    <UploadProgressModal
+      :isVisible="isUploadingAll"
+      :progress="uploadProgressBar"
+      headerText="uploading to Database"
+    />
   </div>
 </template>
 
 <script>
 import ModalComponent from "../components/ModalComponent.vue";
+import UploadProgressModal from "../components/UploadProgressModal.vue";
 import axios from "axios";
 export default {
   components: {
     ModalComponent,
+    UploadProgressModal,
   },
   data() {
     return {
@@ -149,28 +166,85 @@ export default {
       showModal: false,
       modalMessage: "",
       modalHeaderText: "เกิดข้อผิดพลาด",
+      fileUploaded: false,
+      modalAction: null,
+      totalFiles: 0,
+      isUploadingAll: false,
+      uploadProgress: 0,
+      progressPerChunk: 0,
+      uploadProgressBar: 0,
     };
   },
   methods: {
-    closeModalAndRefresh() {
-      this.showModal = false;
-      window.location.reload();
+    updateTotalFiles(files) {
+      this.totalFiles = files.length;
     },
-    // toggleUpload() {
-    //   this.isUploading = !this.isUploading;
-    // },
+    isValidFile(file) {
+      const validExtensions = ["image/jpeg", "image/jpg", "image/png"];
+      return validExtensions.includes(file.type);
+    },
+    closeModalAndRefresh() {
+      if (this.modalAction) {
+        this.modalAction();
+        this.modalAction = null;
+      } else {
+        window.location.reload();
+      }
+    },
+
+    toggleUpload() {
+      this.isUploading = !this.isUploading;
+    },
     handleFileDrop(event) {
-      const files = event.dataTransfer.items
+      if (this.fileUploaded) {
+        return;
+      }
+
+      let files = event.dataTransfer.items
         ? Array.from(event.dataTransfer.items).map((item) => item.getAsFile())
         : Array.from(event.dataTransfer.files);
+
+      const originalFileCount = files.length;
+      files = files.filter(this.isValidFile);
+
+      if (files.length < originalFileCount) {
+        this.modalMessage =
+          "The files you attempted to upload contain unsupported formats. Only .jpg, .jpeg, and .png files are allowed.<br><br> Please check your selection and try again.";
+        this.modalHeaderText = "Unsupported File Format";
+        this.showModal = true;
+        this.modalAction = () => {
+          this.showModal = false;
+        };
+        return;
+      }
+
       this.uploadFile(files);
+      this.fileUploaded = true;
     },
+
     triggerFileInput() {
       this.$refs.fileInput.click();
     },
     fileInputChange(event) {
-      const files = Array.from(event.target.files);
-      this.uploadFile(files);
+      if (this.fileUploaded) {
+        return;
+      }
+      const files = Array.from(event.target.files).filter(this.isValidFile);
+
+      if (files.length !== event.target.files.length) {
+        this.modalMessage =
+          "The files you attempted to upload contain unsupported formats. Only .jpg, .jpeg, and .png files are allowed.<br><br> Please check your selection and try again.";
+        this.modalHeaderText = "Unsupported File Format";
+        this.showModal = true;
+        this.modalAction = () => {
+          this.showModal = false;
+        };
+      }
+
+      if (files.length > 0) {
+        this.uploadFile(files);
+      }
+      this.fileUploaded = true;
     },
     async uploadFile(files) {
       try {
@@ -186,6 +260,9 @@ export default {
           };
           this.uploadingFiles.push(newFile);
         });
+
+        // เพิ่มบรรทัดนี้
+        this.totalFiles = this.uploadingFiles.length;
 
         for (let i = 0; i < this.uploadingFiles.length; i++) {
           await this.convertToBase64(files[i], this.uploadingFiles[i]);
@@ -223,7 +300,7 @@ export default {
       reader.readAsDataURL(file);
       reader.onload = () => {
         targetFileObj.base64 = reader.result.split(",")[1];
-        console.log(targetFileObj.base64);
+        // console.log(targetFileObj.base64);
       };
       reader.onerror = (error) => {
         console.log("Error converting to base64: ", error);
@@ -238,6 +315,7 @@ export default {
     },
     cancelUpload(index) {
       this.uploadingFiles[index].isCancelled = true;
+      this.totalFiles--;
     },
 
     findFileIndex(fileName) {
@@ -245,34 +323,98 @@ export default {
     },
     async uploadAll() {
       try {
-        const validFiles = this.uploadingFiles.filter(
-          (file) => !file.isCancelled && file.base64
-        );
+        this.isUploadingAll = true;
+        this.uploadProgress = 0;
 
-        const chunks = [];
-        for (let i = 0; i < validFiles.length; i += 10) {
-          chunks.push(validFiles.slice(i, i + 10));
+        const maxChunkSize = 5 * 1024 * 1024; // 5MB
+        const maxFilesPerChunk = 10;
+        let chunks = [];
+        let currentChunk = [];
+        let currentChunkSize = 0;
+        let currentFileCount = 0;
+
+        for (let file of this.uploadingFiles) {
+          const fileSize = atob(file.base64).length; // ขนาดของไฟล์ใน byte
+
+          if (
+            currentChunkSize + fileSize <= maxChunkSize &&
+            currentFileCount < maxFilesPerChunk
+          ) {
+            currentChunk.push(file.base64);
+            currentChunkSize += fileSize;
+            currentFileCount++;
+          } else {
+            chunks.push(currentChunk);
+            currentChunk = [file.base64];
+            currentChunkSize = fileSize;
+            currentFileCount = 1;
+          }
+        }
+        if (currentChunk.length) {
+          chunks.push(currentChunk);
         }
 
+        this.progressPerChunk = 100 / chunks.length;
+
+        let totalResponses = 0; // สำหรับเช็คจำนวนการยิง API
+        let singleID = null; // สำหรับเก็บ ID ในกรณีที่มี ID เดียว
+
         for (let chunk of chunks) {
-          const base64Array = chunk.map((file) => file.base64);
-          const response = await axios.post("api/add_collection", {
-            img_file: base64Array,
-          });
+          const targetProgress = this.uploadProgress + this.progressPerChunk;
+
+          const response = await axios.post(
+            "http://127.0.0.1:8000/api/add_collection",
+            { img_file: chunk }
+          );
 
           if (response.status !== 200) {
             throw new Error("Failed to upload some chunks");
           }
+
+          this.smoothProgress(targetProgress);
+          this.uploadProgress += this.progressPerChunk;
+          totalResponses++;
+
+          if (response.data.ids.length === 1 && totalResponses === 1) {
+            singleID = response.data.ids[0];
+          } else {
+            singleID = null;
+          }
         }
-        alert("All files have been successfully uploaded!");
-        window.location.reload();
+        setTimeout(() => {
+          if (singleID) {
+            this.$router.push(`/images/label/${singleID}`);
+          } else {
+            this.$router.push("/images");
+          }
+        }, 2500);
       } catch (error) {
         console.error("Error during batch upload:", error);
         this.modalMessage =
           "Sorry, there was a problem uploading your files. Please try again later.";
         this.modalHeaderText = "Upload Failed 🚫";
         this.showModal = true;
+      } finally {
+        setTimeout(() => {
+          this.isUploadingAll = false;
+        }, 3000);
       }
+    },
+    smoothProgress(target) {
+      const step = 1; // ค่าที่จะเพิ่มทุกครั้งที่อัพเดท
+      const interval = 20; // ความถี่ในการอัพเดท (มิลลิวินาที)
+
+      let currentProgress = this.uploadProgress;
+
+      const progressInterval = setInterval(() => {
+        if (currentProgress < target) {
+          currentProgress += step;
+          if (currentProgress > target) currentProgress = target; // ป้องกันไม่ให้เกินค่าเป้าหมาย
+          this.uploadProgressBar = currentProgress;
+        } else {
+          clearInterval(progressInterval);
+        }
+      }, interval);
     },
   },
   computed: {
@@ -291,6 +433,9 @@ export default {
       return this.uploadingFiles.every(
         (file) => file.progress === 100 || file.isCancelled
       );
+    },
+    allFilesCancelled() {
+      return this.uploadingFiles.every((file) => file.isCancelled);
     },
   },
 };

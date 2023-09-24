@@ -1,3 +1,10 @@
+.file-info {
+  display: flex;
+  height: 5%;
+  justify-content: flex-end;
+  align-items: center;
+}
+
 .cancelable-icon {
   cursor: pointer;
 }
@@ -88,6 +95,10 @@
   /* background-color: #c9baba; */
 }
 
+.progress-bar-striped {
+  border-radius: 5px;
+}
+
 .cancel-icon {
   grid-column: 3;
   /* background-color: hotpink; */
@@ -95,12 +106,14 @@
 .uploading-file {
   /* background-color: cornsilk; */
   overflow-y: auto;
-  height: 85%;
+  height: 80%;
+  min-height: 350px;
 }
 .file-upload-container {
   align-items: center;
   display: grid;
   grid-template-columns: 3fr 8fr 1fr;
+  margin-bottom: 5px;
 }
 
 h1 {
@@ -121,7 +134,6 @@ h1 {
   border-radius: 10px;
   padding: 20px;
   width: 100%;
-  min-height: 300px;
   text-align: center;
 }
 .drop-message-isupload {
@@ -172,12 +184,11 @@ h1 {
   height: 10%;
 }
 .grid-container {
-  
   @import "bootstrap/scss/bootstrap.scss";
   display: grid;
   grid-template-rows: minmax(80px, auto) 1fr minmax(80px, auto);
   grid-template-columns: minmax(0, 2fr) minmax(440px, 6fr) minmax(0, 2fr);
-  height: calc(100vh - 42px);
+  height: calc(100vh - 52px);
   // background-color: aliceblue;
   overflow-y: auto;
   overflow-x: hidden;

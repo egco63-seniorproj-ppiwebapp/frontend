@@ -1,6 +1,13 @@
 <template>
   <div class="radio">
-    <input type="radio" :id="id" :name="group" />
+    <input
+      type="radio"
+      :id="id"
+      :name="group"
+      :value="value"
+      @change="onChange"
+      v-model="pick"
+    />
     <label :for="id">
       {{ label }}
     </label>
@@ -16,12 +23,22 @@ export default defineComponent({
   props: {
     label: String,
     group: String,
+    value: {
+      type: String,
+      required: true,
+    },
   },
   data: () => ({
     id: "",
+    pick: "",
   }),
   created() {
     this.id = `rd${count++}`;
+  },
+  methods: {
+    onChange() {
+      if (this.pick == this.value) this.$emit("select", this.pick);
+    },
   },
 });
 </script>

@@ -19,7 +19,7 @@
       <div class="select">
         <label for="select-footside">Foot side:</label>
         <select id="select-footside" name="footside" v-model="footside">
-          <option value="">Both</option>
+          <option value="">Any</option>
           <option value="L">Left</option>
           <option value="R">Right</option>
         </select>
@@ -27,7 +27,7 @@
       <div class="select">
         <label for="select-label">Label:</label>
         <select id="select-label" name="footlabel" v-model="footlabel">
-          <option value="">All</option>
+          <option value="">Any</option>
           <option value="N">Normal</option>
           <option value="H">High</option>
           <option value="F">Flat</option>
@@ -38,9 +38,8 @@
       <div class="select">
         <label for="select-sortby">Sort by:</label>
         <select id="select-sortby" name="sortby" v-model="sortby">
-          <option value="pk">ID</option>
+          <option value="pk">Time of Upload</option>
           <option value="name">Name</option>
-          <option value="created_date">Time of Upload</option>
         </select>
       </div>
       <div class="select">
@@ -109,7 +108,7 @@ export default defineComponent({
       this.searchHandler({
         name: this.searchname,
         sortby: this.sortby,
-        sortorder: this.sortorder,
+        ascending: this.sortorder,
         footlabel: this.footlabel,
         footside: this.footside,
       });

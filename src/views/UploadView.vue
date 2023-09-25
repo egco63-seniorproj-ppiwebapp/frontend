@@ -407,7 +407,7 @@ export default {
         for (let chunk of chunks) {
           const targetProgress = this.uploadProgress + this.progressPerChunk;
 
-          const response = await axios.post("api/add_collection", {
+          const response = await axios.post("/api/add_collection", {
             img_file: chunk,
           });
 
@@ -427,7 +427,7 @@ export default {
         }
         setTimeout(() => {
           if (singleID) {
-            this.$router.push(`/images/label/${singleID}`);
+            this.$router.push(`/images/id/${singleID}`);
           } else {
             this.$router.push("/images");
           }

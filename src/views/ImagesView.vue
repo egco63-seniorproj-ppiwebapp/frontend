@@ -4,7 +4,8 @@
       <ImageSearch :search-handler="search" />
     </div>
     <div class="gallery">
-      <ImageGrid :images="images" />
+      <ImageGrid :images="images" v-if="renderGallery" />
+      <LoadSpinner v-else />
     </div>
   </div>
   <router-view />
@@ -31,21 +32,83 @@
 import { defineComponent } from "vue";
 import ImageGrid from "@/components/ImageGrid.vue";
 import ImageSearch from "@/components/ImageSearch.vue";
-import { SearchParameters } from "@/types";
+import { SearchParameters, ImageThumbnailData, ImageMetadata } from "@/types";
+import { parseImageMetadata } from "@/utils";
 
-import images from "@/assets/images.json";
+import axios from "axios";
+import LoadSpinner from "@/components/LoadSpinner.vue";
 
 export default defineComponent({
   name: "ImagesView",
   components: {
     ImageGrid,
     ImageSearch,
+    LoadSpinner,
   },
-  data: () => ({ images }),
-  methods: {
-    search(params: SearchParameters) {
-      console.log(params);
+  data: () => ({
+    renderGallery: false,
+    images: [] as Array<ImageThumbnailData>,
+    searchParams: {
+      name: "",
+      footlabel: "",
+      footside: "",
+      sortby: "pk",
+      ascending: false,
+    } as SearchParameters,
+    indexingAt: {
+      start: 0,
+      end: 20,
     },
+  }),
+  methods: {
+    async reloadGallery() {
+      this.renderGallery = false;
+      this.images = await this.loadImages();
+      await this.$nextTick();
+      this.renderGallery = true;
+    },
+    search(params: SearchParameters) {
+      this.searchParams.name = params.name;
+      this.searchParams.footlabel = params.footlabel;
+      this.searchParams.footside = params.footside;
+      this.searchParams.sortby = params.sortby;
+      this.searchParams.ascending = params.ascending;
+      this.reloadGallery();
+    },
+    serializeSearchParams() {
+      const { name, footlabel, footside, sortby, ascending } =
+        this.searchParams;
+
+      const validParams = new URLSearchParams();
+      validParams.append("start", this.indexingAt.start.toString());
+      validParams.append("end", this.indexingAt.end.toString());
+      validParams.append("ascending", ascending.toString());
+
+      if (name.length > 0) validParams.append("search", name);
+      if (sortby.length > 0) validParams.append("sort", sortby);
+
+      if (footlabel.length > 0) validParams.append("filter", footlabel);
+      if (footside.length > 0) validParams.append("filter", footside);
+
+      return validParams;
+    },
+    async loadImages() {
+      let res = await axios.get("/api/get_collection", {
+        params: this.serializeSearchParams(),
+      });
+      if (res.status != 200) return [] as Array<ImageThumbnailData>;
+      // console.log(res.data);
+      const imgMetaList = res.data as Array<ImageMetadata>;
+      const imgDataList: Array<ImageThumbnailData> = [];
+      for (let meta of imgMetaList) {
+        imgDataList.push(parseImageMetadata(meta));
+      }
+      return imgDataList;
+    },
+  },
+  async mounted() {
+    // console.log(this.searchParams);
+    this.reloadGallery();
   },
 });
 </script>

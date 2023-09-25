@@ -60,12 +60,22 @@ export default defineComponent({
       end: 20,
     },
   }),
+  created() {
+    this.$watch(
+      () => this.$store.getters.galleryReloadNeeded,
+      async () => {
+        await this.reloadGallery();
+      },
+      { immediate: true }
+    );
+  },
   methods: {
     async reloadGallery() {
       this.renderGallery = false;
       this.images = await this.loadImages();
       await this.$nextTick();
       this.renderGallery = true;
+      this.$store.commit("resetGalleryReload");
     },
     search(params: SearchParameters) {
       this.searchParams.name = params.name;

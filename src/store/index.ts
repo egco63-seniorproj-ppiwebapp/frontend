@@ -9,10 +9,14 @@ export const key: InjectionKey<Store<State>> = Symbol();
 export default createStore({
   state: {
     user: null as string | null,
+    gallery: {
+      reloadNeeded: false,
+    },
   },
   getters: {
     isAuthenticated: (state) => !!state.user,
     username: (state) => state.user,
+    galleryReloadNeeded: (state) => state.gallery.reloadNeeded,
   },
   mutations: {
     setUser(state, username: string) {
@@ -20,6 +24,12 @@ export default createStore({
     },
     resetUser(state) {
       state.user = null;
+    },
+    setGalleryReload(state) {
+      state.gallery.reloadNeeded = true;
+    },
+    resetGalleryReload(state) {
+      state.gallery.reloadNeeded = false;
     },
   },
   actions: {

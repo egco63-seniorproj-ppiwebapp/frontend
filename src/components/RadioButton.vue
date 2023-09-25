@@ -7,6 +7,8 @@
       :value="value"
       @change="onChange"
       v-model="pick"
+      :required="required"
+      :checked="checked"
     />
     <label :for="id">
       {{ label }}
@@ -27,6 +29,8 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    required: Boolean,
+    checked: Boolean,
   },
   data: () => ({
     id: "",

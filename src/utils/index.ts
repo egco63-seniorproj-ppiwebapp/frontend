@@ -1,4 +1,5 @@
 import { ImageMetadata, ImageThumbnailData } from "@/types";
+import axios, { AxiosResponse } from "axios";
 
 export function parseImageMetadata(imgMeta: ImageMetadata) {
   const { id, name, side } = imgMeta;
@@ -27,4 +28,18 @@ export function parseImageMetadata(imgMeta: ImageMetadata) {
     tags: tags,
   };
   return imgData;
+}
+
+export async function handleAxiosResponse(
+  axiosRequestFunction: () => Promise<AxiosResponse>
+) {
+  let res: AxiosResponse;
+  try {
+    res = await axiosRequestFunction();
+  } catch (err) {
+    if (!axios.isAxiosError(err)) throw err;
+    if (!err.response) throw err;
+    res = err.response;
+  }
+  return res;
 }

@@ -1,21 +1,8 @@
 import { AuthData } from "@/types";
-import axios, { AxiosResponse } from "axios";
+import { handleAxiosResponse } from "@/utils";
+import axios from "axios";
 import { InjectionKey, State } from "vue";
 import { Store, createStore } from "vuex";
-
-async function handleAxiosResponse(
-  axiosRequestFunction: () => Promise<AxiosResponse>
-) {
-  let res: AxiosResponse;
-  try {
-    res = await axiosRequestFunction();
-  } catch (err) {
-    if (!axios.isAxiosError(err)) throw err;
-    if (!err.response) throw err;
-    res = err.response;
-  }
-  return res;
-}
 
 export const key: InjectionKey<Store<State>> = Symbol();
 

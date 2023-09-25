@@ -35,7 +35,7 @@ export default createStore({
   actions: {
     async login(ctx, authdata: AuthData) {
       const res = await handleAxiosResponse(() =>
-        axios.post("api/auth", authdata)
+        axios.post("/api/auth", authdata)
       );
       if (res.status == 200) {
         ctx.commit("setUser", authdata.username);
@@ -45,7 +45,7 @@ export default createStore({
     },
     async logout(ctx) {
       if (!ctx.getters.isAuthenticated) return true;
-      const res = await handleAxiosResponse(() => axios.get("api/logout"));
+      const res = await handleAxiosResponse(() => axios.get("/api/logout"));
       if (res.status == 200) {
         ctx.commit("resetUser");
         return true;
@@ -53,7 +53,7 @@ export default createStore({
       return false;
     },
     async session(ctx) {
-      const res = await handleAxiosResponse(() => axios.get("api/session"));
+      const res = await handleAxiosResponse(() => axios.get("/api/session"));
       if (res.status == 200) {
         const username = res.data as string;
         ctx.commit("setUser", username);

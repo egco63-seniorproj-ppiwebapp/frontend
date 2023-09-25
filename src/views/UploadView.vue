@@ -126,7 +126,7 @@
                 checkAllFilesCancelled() || !isAllUploaded || isUploadingAll
               "
               :style="
-                allFilesCancelled || !isAllUploaded || isUploadingAll
+                !isAllUploaded || isUploadingAll
                   ? { cursor: 'not-allowed' }
                   : { cursor: 'pointer' }
               "

@@ -1,11 +1,11 @@
 <template>
   <div v-if="isVisible" class="modal-overlay">
-    <div class="modal">
+    <div class="modal-container">
       <div class="modal-header">
         <h3>{{ headerText }}</h3>
       </div>
       <div class="modal-body">
-        <p>{{ descriptionText }}</p>
+        <p v-html="descriptionText"></p>
       </div>
       <div class="modal-footer">
         <input type="button" value="OK" class="primary" @click="closeModal" />
@@ -14,8 +14,11 @@
   </div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  name: "ModelBase",
   props: {
     isVisible: Boolean,
     headerText: String,
@@ -26,7 +29,7 @@ export default {
       this.$emit("close");
     },
   },
-};
+});
 </script>
 
 <style scoped>
@@ -42,7 +45,7 @@ export default {
   align-items: center;
 }
 
-.modal {
+.modal-container {
   background: white;
   width: 80%;
   max-width: 500px;
@@ -72,7 +75,7 @@ export default {
 
 .modal-body {
   padding: 20px;
-  text-align: center;
+  text-align: left; /* ปรับจาก center เป็น left */
 }
 
 .modal-footer {

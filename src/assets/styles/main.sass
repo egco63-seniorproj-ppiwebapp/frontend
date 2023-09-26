@@ -3,9 +3,14 @@
 @use 'button'
 @use 'textbox'
 
+*
+  box-sizing: border-box
+
 html, body
   margin: 0
   font-size: 12pt
+  user-select: none
+  height: 100%
 
 #app
   font-family: Avenir, Helvetica, Arial, sans-serif
@@ -14,31 +19,30 @@ html, body
   color: base.$default-font-color
   margin: 0
   padding: 0
+  display: grid
+  grid-auto-rows: max-content auto
+  height: 100%
 
-@mixin for-phone-screen
-  @media (max-width: 768px)
-    @content
+.view-container
+  overflow-y: auto
 
-@mixin container-width($width: 768px)
-  $padding-size: calc((100% - $width) / 2)
-  padding-left: $padding-size
-  padding-right: $padding-size
+.container
+  padding: 1.5rem
 
-div.container
-  $navbar-height: 52px
-  $container-padding-topbottom: 50px
-  @include container-width
-  height: calc(100vh - $navbar-height - 2*$container-padding-topbottom)
-  padding-top: $container-padding-topbottom
-  padding-bottom: $container-padding-topbottom
-  overflow-y: scroll
+select
+  @include base.basic-element-styles
+  border: 1px solid base.$default-color
+  background: none
 
-  @include for-phone-screen
-    // @include container-width($width: 500px)
+  &:focus
+    @include base.focus-outline($color: base.$primary-color)
 
-@media (min-width 800px)
-  div.container
-    $container-width: 200px
-    $container-padding-leftright: calc((100% - $container-width) / 2)
-    $container-padding-topbottom: 50px
-    padding: $container-padding-topbottom $container-padding-leftright
+::-webkit-scrollbar
+  width: 12px
+
+::-webkit-scrollbar-track
+  margin: 12px 0px
+
+::-webkit-scrollbar-thumb
+  background: rgba(base.$scrollbar-thumb-color, 0.8)
+  border-radius: 6px

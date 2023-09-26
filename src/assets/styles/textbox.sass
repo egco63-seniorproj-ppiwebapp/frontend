@@ -1,11 +1,8 @@
 @use 'base'
 
 input[type="text"], input[type="password"], textarea
-  padding: base.$element-padding
-  font-family: inherit
-  font-size: inherit
+  @include base.basic-element-styles
   border: 1px solid base.$default-color
-  border-radius: base.$element-border-radius
   transition: 0.02s ease-out
 
   &:focus

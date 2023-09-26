@@ -6,20 +6,24 @@
         <div class="counter-item">
           <div class="title">
             <font-awesome-icon :icon="['far', 'fa-image']" />
-            <span> All time uploads</span>
+            <span>Your all time uploads</span>
           </div>
           <div class="count">
-            <span class="num">{{ (1234).toLocaleString() }}</span>
+            <span class="num">{{
+              userLabelCount.reduce((a, b) => a + b).toLocaleString()
+            }}</span>
             <span class="unit"> images</span>
           </div>
         </div>
         <div class="counter-item">
           <div class="title">
             <font-awesome-icon :icon="['far', 'fa-image']" />
-            <span> This month uploads</span>
+            <span>Your uploads this month</span>
           </div>
           <div class="count">
-            <span class="num">{{ (15).toLocaleString() }}</span>
+            <span class="num">{{
+              userLabelMonthCount[new Date().getMonth()].toLocaleString()
+            }}</span>
             <span class="unit"> images</span>
           </div>
         </div>
@@ -27,18 +31,33 @@
     </div>
     <div class="donut donut1">
       <h2 class="donut-title">{{ "All users" }}</h2>
-      <Doughnut :data="donut1.data" :options="donut1.options" />
+      <Doughnut
+        :data="donut1.data"
+        :options="(donut1.options as any)"
+        v-if="dataReady && ready"
+      />
+      <LoadSpinner v-else style="height: 220px; margin-bottom: 100px" />
     </div>
     <div class="donut donut2">
       <h2 class="donut-title">{{ "Yours" }}</h2>
-      <Doughnut :data="donut2.data" :options="donut2.options" />
+      <Doughnut
+        :data="donut2.data"
+        :options="(donut2.options as any)"
+        v-if="dataReady && ready"
+      />
+      <LoadSpinner v-else style="height: 220px; margin-bottom: 100px" />
     </div>
     <div class="trend">
       <div class="trend-title">
         <h2>Uploads</h2>
         <span>{{ new Date().getFullYear() }}</span>
       </div>
-      <Bar :data="bar.data" :options="bar.options"></Bar>
+      <Bar
+        :data="bar.data"
+        :options="(bar.options as any)"
+        v-if="dataReady && ready"
+      ></Bar>
+      <LoadSpinner v-else style="height: 320px" />
     </div>
   </div>
 </template>
@@ -190,6 +209,7 @@ span.callout
   width: 320px
   margin: auto 0
   margin-bottom: 0px
+  position: relative
 
 .donut1
   grid-area: donut1
@@ -219,7 +239,7 @@ span.callout
 </style>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, PropType } from "vue";
 import { Doughnut, Bar } from "vue-chartjs";
 import {
   Chart as ChartJS,
@@ -232,7 +252,9 @@ import {
   BarElement,
   Legend,
 } from "chart.js";
-import AllToolTips from "@/views/AllToolTips";
+import AllToolTips from "@/utils/AllToolTips";
+import { sleep } from "@/utils";
+import LoadSpinner from "@/components/LoadSpinner.vue";
 
 ChartJS.register(
   ArcElement,
@@ -250,15 +272,40 @@ export default defineComponent({
   components: {
     Doughnut,
     Bar,
+    LoadSpinner,
   },
-  data: () => ({
+  props: {
+    dataReady: {
+      type: Boolean,
+      required: true,
+    },
+    allLabelCount: {
+      type: Array as PropType<number[]>,
+      required: true,
+    },
+    userLabelCount: {
+      type: Array as PropType<number[]>,
+      required: true,
+    },
+    allLabelMonthCount: {
+      type: Array as PropType<number[]>,
+      required: true,
+    },
+    userLabelMonthCount: {
+      type: Array as PropType<number[]>,
+      required: true,
+    },
+  },
+  data: ($) => ({
+    ready: false,
     donut1: {
       data: {
         labels: ["Unlabel", "Flat", "Normal", "High"],
         datasets: [
           {
             // label: "All users",
-            data: [45, 4, 7, 2],
+            // data: [45, 4, 7, 2],
+            data: $.allLabelCount,
             backgroundColor: [
               "rgb(255, 99, 132)",
               "#62aa92",
@@ -278,7 +325,10 @@ export default defineComponent({
         radius: 120,
         plugins: {
           tooltip: {
-            enabled: false,
+            // enabled: false,
+            backgroundColor: "lightgray",
+            bodyColor: "black",
+            titleColor: "black",
           },
           legend: false,
         },
@@ -290,7 +340,7 @@ export default defineComponent({
         datasets: [
           {
             // label: "All users",
-            data: [16, 0, 2, 1],
+            data: $.userLabelCount,
             backgroundColor: [
               "rgb(255, 99, 132)",
               "#62aa92",
@@ -305,7 +355,10 @@ export default defineComponent({
         radius: 120,
         plugins: {
           tooltip: {
-            enabled: false,
+            // enabled: false,
+            backgroundColor: "lightgray",
+            bodyColor: "black",
+            titleColor: "black",
           },
           legend: false,
         },
@@ -329,12 +382,12 @@ export default defineComponent({
         ],
         datasets: [
           {
-            data: [0, 0, 0, 19, 0, 0, 0, 2, 4, 0, 0, 0],
+            data: $.allLabelMonthCount,
             backgroundColor: "rgb(255, 205, 86)",
             label: "Total Uploads",
           },
           {
-            data: [0, 0, 0, 10, 0, 0, 0, 1, 3, 0, 0, 0],
+            data: $.userLabelMonthCount,
             backgroundColor: "#62aa92",
             label: "Your Uploads",
           },
@@ -351,16 +404,38 @@ export default defineComponent({
             padding: 20,
             color: "red",
           },
+          tooltip: {
+            backgroundColor: "lightgray",
+            bodyColor: "black",
+            titleColor: "black",
+          },
         },
         scales: {},
       },
     },
   }),
-  mounted() {
-    // console.log(donut1, donut2);
-    // donut1.register(ArcElement, Tooltip, Title, new AllToolTips());
-    // donut2.register(ArcElement, Tooltip, Title, new AllToolTips());
+  async mounted() {
+    while (!this.dataReady) {
+      await sleep(100);
+    }
+    await this.reloadChartData();
+    // console.log(
+    //   this.bar.data.datasets[0].data,
+    //   this.bar.data.datasets[1].data,
+    //   this.donut1.data.datasets[0].data,
+    //   this.donut2.data.datasets[0].data
+    // );
   },
-  methods: {},
+  methods: {
+    async reloadChartData() {
+      this.ready = false;
+      this.bar.data.datasets[0].data = this.allLabelMonthCount;
+      this.bar.data.datasets[1].data = this.userLabelMonthCount;
+      this.donut1.data.datasets[0].data = this.allLabelCount;
+      this.donut2.data.datasets[0].data = this.userLabelCount;
+      await this.$nextTick();
+      this.ready = true;
+    },
+  },
 });
 </script>

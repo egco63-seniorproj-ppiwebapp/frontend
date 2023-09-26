@@ -15,8 +15,8 @@
               <font-awesome-icon :icon="['fas', 'fa-tag']" />
               <span> Label images</span>
             </div>
-            <div class="desc">
-              {{ `You still have ${15} unlabeled images.` }}
+            <div class="desc" v-if="unlabelCount > 0">
+              {{ `You still have ${unlabelCount} unlabeled images.` }}
             </div>
           </button>
         </router-link>
@@ -28,7 +28,7 @@
             </div>
           </button>
         </router-link>
-        <router-link to="/label">
+        <router-link to="/images">
           <button class="primary">
             <div class="title">
               <font-awesome-icon :icon="['fas', 'fa-images']" />
@@ -36,7 +36,7 @@
             </div>
           </button>
         </router-link>
-        <router-link to="/label">
+        <router-link to="/diagnose">
           <button class="primary">
             <div class="title">
               <font-awesome-icon :icon="['fas', 'fa-stethoscope']" />
@@ -130,8 +130,16 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "HomePanel",
-  data: () => ({
-    username: "john123",
-  }),
+  props: {
+    unlabelCount: {
+      type: Number,
+      required: true,
+    },
+  },
+  computed: {
+    username() {
+      return this.$store.getters.username;
+    },
+  },
 });
 </script>

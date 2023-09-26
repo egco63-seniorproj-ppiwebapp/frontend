@@ -92,8 +92,10 @@ export default class AllToolTips implements Plugin {
       (number | [number, number] | Point | BubbleDataPoint | null)[],
       unknown
     >,
-    args: EmptyObject,
-    options: AnyObject
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _args: EmptyObject,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _options: AnyObject
   ): void {
     if (!chart.options.plugins) chart.options.plugins = {};
     if (!chart.options.plugins.alltooltips)

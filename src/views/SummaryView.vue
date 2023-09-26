@@ -25,32 +25,38 @@
         </div>
       </div>
     </div>
-    <div class="donut1">
-      <Doughnut id="donut1" :data="donut1.data" :options="donut1.options" />
+    <div class="donut donut1">
+      <h2 class="donut-title">{{ "All users" }}</h2>
+      <Doughnut :data="donut1.data" :options="donut1.options" />
     </div>
-    <div class="donut2"></div>
+    <div class="donut donut2">
+      <h2 class="donut-title">{{ "Yours" }}</h2>
+      <Doughnut :data="donut2.data" :options="donut2.options" />
+    </div>
     <div class="trend">
-      <span class="callout top vertical dialog">
-        <span class="label">Unlabel</span>
-        <span class="value">24%</span>
-      </span>
-      <span class="callout top">123 123 123</span>
+      <div class="trend-title">
+        <h2>Uploads</h2>
+        <span>{{ new Date().getFullYear() }}</span>
+      </div>
+      <Bar :data="bar.data" :options="bar.options"></Bar>
     </div>
   </div>
 </template>
 
 <style lang="sass">
 .callout
-  background-color: #e7e7e7
+  background-color: #e2e2e2
   border-radius: 6px
   font-size: 12px
-  box-shadow: 0 0 10px -5px rgba(0, 0, 0, 0.2)
+  box-shadow: 0 0 15px -5px rgba(0, 0, 0, 0.3)
+  // transition: top 0.02s ease-out, left 0.02s ease-out
 span.callout.dialog
   >span
     display: flex
     justify-content: center
     align-items: center
     font-weight: bold
+    transform: translateZ(1px)
   .value
     margin-top: 4px
   .label
@@ -67,6 +73,11 @@ span.callout
   position: relative
   margin: 5px
 
+  $caret-trasform-base: scaleY(300%) rotate(45deg) //translateZ(-1px)
+  $vertical-caret: translate(-50%, -50%) $caret-trasform-base
+  $horizontal-caret: translate(-50%, -50%) rotate(90deg) $caret-trasform-base
+  $caret-edge-offset: 16px
+
   &::before
     content: ""
     display: block
@@ -74,58 +85,70 @@ span.callout
     width: 0.75em
     height: 0.75em
     background: inherit
-    transform: translate(-50%, -50%) rotate(45deg) translateZ(-1px)
+    // transition: transform 0.2s linear
 
   &.bottom::before
+    transform: $vertical-caret
     left: 50%
     top: 100%
   &.left::before
+    transform: $horizontal-caret
     left: 0%
     top: 50%
   &.bottom.left::before
-    left: 20px
+    transform: $vertical-caret
+    left: $caret-edge-offset
     top: 100%
   &.bottom.left.vertical::before
+    transform: $horizontal-caret
     left: 0%
-    top: calc(100% - 20px)
+    top: calc(100% - $caret-edge-offset)
 
   &.right::before
+    transform: $horizontal-caret
     left: 100%
     top: 50%
   &.bottom.right::before
-    left: calc(100% - 20px)
+    transform: $vertical-caret
+    left: calc(100% - $caret-edge-offset)
     top: 100%
   &.bottom.right.vertical::before
+    transform: $horizontal-caret
     left: 100%
-    top: calc(100% - 20px)
+    top: calc(100% - $caret-edge-offset)
 
   &.top::before
+    transform: $vertical-caret
     left: 50%
     top: 0%
   &.top.left::before
-    left: 20px
+    transform: $vertical-caret
+    left: $caret-edge-offset
     top: 0%
   &.top.left.vertical::before
+    transform: $horizontal-caret
     left: 0%
-    top: 20px
+    top: $caret-edge-offset
   &.top.right::before
-    left: calc(100% - 20px)
+    transform: $vertical-caret
+    left: calc(100% - $caret-edge-offset)
     top: 0%
   &.top.right.vertical::before
+    transform: $horizontal-caret
     left: 100%
-    top: 20px
+    top: $caret-edge-offset
 </style>
 <style lang="sass" scoped>
 @use '@/assets/styles/base'
 
 .homebody
   display: grid
-  grid-template-columns: auto auto auto
-  grid-template-rows: auto auto
+  grid-template-columns: 340px auto auto
+  grid-template-rows: 380px 200px
   grid-template-areas: "counter donut1 donut2" "trend trend trend"
   height: 100%
   min-width: 800px
-  column-gap: 10px
+  column-gap: 20px
   row-gap: 20px
   padding: 10px
 
@@ -134,6 +157,7 @@ span.callout
   display: flex
   flex-flow: column
   margin-top: 20px
+  margin-right: 40px
 
 .counter-group
   display: flex
@@ -162,44 +186,70 @@ span.callout
     .unit
       margin-left: 6px
 
+.donut
+  width: 320px
+  margin: auto 0
+  margin-bottom: 0px
+
 .donut1
   grid-area: donut1
 .donut2
   grid-area: donut2
+
+
+.donut-title
+  top: 50%
+  left: 50%
+  position: absolute
+  transform: translate(-50%, -100%)
 .trend
   grid-area: trend
+  display: flex
+  flex-flow: column
+  height: 250px
+  margin-top: -40px
+
+  .trend-title
+    h2
+      display: inline-block
+      margin-right: 20px
+
+  canvas
+    height: 250px
 </style>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { Doughnut } from "vue-chartjs";
+import { Doughnut, Bar } from "vue-chartjs";
 import {
   Chart as ChartJS,
-  DoughnutControllerChartOptions,
-  // CoreChartOptions,
-  PluginChartOptions,
   ChartData,
   ArcElement,
   Tooltip,
-  Legend,
   Title,
+  LinearScale,
+  CategoryScale,
+  BarElement,
+  Legend,
 } from "chart.js";
-import ChartDataLabels from "chartjs-plugin-datalabels";
 import AllToolTips from "@/views/AllToolTips";
 
 ChartJS.register(
   ArcElement,
+  BarElement,
   Tooltip,
-  Legend,
   Title,
-  ChartDataLabels,
-  new AllToolTips()
+  new AllToolTips(),
+  LinearScale,
+  CategoryScale,
+  Legend
 );
 
 export default defineComponent({
   name: "SummaryView",
   components: {
     Doughnut,
+    Bar,
   },
   data: () => ({
     donut1: {
@@ -219,37 +269,98 @@ export default defineComponent({
         ],
       } as ChartData<"doughnut">,
       options: {
-        cutout: 135,
-        radius: 100,
-        plugins: {
-          tooltip: {
-            xAlign: "left",
-            yAlign: "bottom",
-          },
-          // datalabels: {
-          //   backgroundColor: "#efefef",
-          //   padding: 10,
-          //   color: "black",
-          //   anchor: "end",
-          //   align: "end",
-          //   offset: 15,
-          //   labels: {
-          //     value: {
-          //       color: "green",
-          //     },
-          //     title: {
-          //       color: "red",
-          //     },
-          //   },
-          //   // formatter: (value, context) => {
-          //   //   const labels = context.chart.data.labels as string[];
-          //   //   return `${labels[context.dataIndex]}: ${value}`;
-          //   // },
+        layout: {
+          // padding: {
+          //   top: -50,
           // },
         },
-      } as DoughnutControllerChartOptions & PluginChartOptions<"doughnut">,
+        cutout: 90,
+        radius: 120,
+        plugins: {
+          tooltip: {
+            enabled: false,
+          },
+          legend: false,
+        },
+      },
+    },
+    donut2: {
+      data: {
+        labels: ["Unlabel", "Flat", "Normal", "High"],
+        datasets: [
+          {
+            // label: "All users",
+            data: [16, 0, 2, 1],
+            backgroundColor: [
+              "rgb(255, 99, 132)",
+              "#62aa92",
+              "rgb(54, 162, 235)",
+              "rgb(255, 205, 86)",
+            ],
+          },
+        ],
+      } as ChartData<"doughnut">,
+      options: {
+        cutout: 90,
+        radius: 120,
+        plugins: {
+          tooltip: {
+            enabled: false,
+          },
+          legend: false,
+        },
+      },
+    },
+    bar: {
+      data: {
+        labels: [
+          "January",
+          "Febuary",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
+        ],
+        datasets: [
+          {
+            data: [0, 0, 0, 19, 0, 0, 0, 2, 4, 0, 0, 0],
+            backgroundColor: "rgb(255, 205, 86)",
+            label: "Total Uploads",
+          },
+          {
+            data: [0, 0, 0, 10, 0, 0, 0, 1, 3, 0, 0, 0],
+            backgroundColor: "#62aa92",
+            label: "Your Uploads",
+          },
+        ],
+      },
+      options: {
+        aspectRatio: 4.5,
+        grouped: true,
+        plugins: {
+          alltooltips: false,
+          legend: {
+            position: "chartArea",
+            align: "start",
+            padding: 20,
+            color: "red",
+          },
+        },
+        scales: {},
+      },
     },
   }),
+  mounted() {
+    // console.log(donut1, donut2);
+    // donut1.register(ArcElement, Tooltip, Title, new AllToolTips());
+    // donut2.register(ArcElement, Tooltip, Title, new AllToolTips());
+  },
   methods: {},
 });
 </script>

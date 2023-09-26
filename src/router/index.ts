@@ -8,6 +8,7 @@ import ImageDetailView from "@/views/ImageDetailView.vue";
 import NavBar from "@/components/NavBar.vue";
 import { useStore } from "vuex";
 import { key } from "@/store";
+import SummaryView from "@/views/SummaryView.vue";
 
 const lazyLoad = (view: string) => () => import(`@/views/${view}.vue`);
 
@@ -19,6 +20,13 @@ const routes: Array<RouteRecordRaw> = [
       default: HomeView,
       NavBar,
     },
+    children: [
+      {
+        path: "/",
+        name: "summary",
+        component: SummaryView,
+      },
+    ],
     meta: { title: "Home", authRequired: true },
   },
   {

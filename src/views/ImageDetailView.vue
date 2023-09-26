@@ -230,7 +230,7 @@
 </style>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
 import { ImageThumbnailData, ImageMetadata } from "@/types";
 import { parseImageMetadata, handleAxiosResponse } from "@/utils";
 import RadioButton from "@/components/RadioButton.vue";

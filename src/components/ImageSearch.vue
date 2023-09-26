@@ -1,55 +1,54 @@
 <template>
   <div class="panel">
-    <div class="searchbar">
-      <input
-        class="searchbox"
-        type="text"
-        placeholder="Image names"
-        v-model="searchname"
-      />
-      <input
-        class="primary searchbtn"
-        type="button"
-        value="Search"
-        @click="onSearch"
-      />
-    </div>
-    <div class="options">
-      <h3>Search Filter</h3>
-      <div class="select">
-        <label for="select-footside">Foot side:</label>
-        <select id="select-footside" name="footside" v-model="footside">
-          <option value="">Any</option>
-          <option value="L">Left</option>
-          <option value="R">Right</option>
-        </select>
+    <form @submit="onSearch">
+      <div class="searchbar">
+        <input
+          class="searchbox"
+          type="text"
+          placeholder="Image names"
+          v-model="searchname"
+        />
+        <button class="primary searchbtn" type="submit">
+          <font-awesome-icon :icon="['fas', 'magnifying-glass']" /> Search
+        </button>
       </div>
-      <div class="select">
-        <label for="select-label">Label:</label>
-        <select id="select-label" name="footlabel" v-model="footlabel">
-          <option value="">Any</option>
-          <option value="N">Normal</option>
-          <option value="H">High</option>
-          <option value="F">Flat</option>
-          <option value="U">Unlabel</option>
-        </select>
+      <div class="options">
+        <h3><font-awesome-icon :icon="['fas', 'filter']" /> Search Filter</h3>
+        <div class="select">
+          <label for="select-footside">Foot side:</label>
+          <select id="select-footside" name="footside" v-model="footside">
+            <option value="">Any</option>
+            <option value="L">Left</option>
+            <option value="R">Right</option>
+          </select>
+        </div>
+        <div class="select">
+          <label for="select-label">Label:</label>
+          <select id="select-label" name="footlabel" v-model="footlabel">
+            <option value="">Any</option>
+            <option value="N">Normal</option>
+            <option value="H">High</option>
+            <option value="F">Flat</option>
+            <option value="U">Unlabel</option>
+          </select>
+        </div>
+        <h3><font-awesome-icon :icon="['fas', 'arrow-up-z-a']" /> Sortation</h3>
+        <div class="select">
+          <label for="select-sortby">Sort by:</label>
+          <select id="select-sortby" name="sortby" v-model="sortby">
+            <option value="pk">Time of Upload</option>
+            <option value="name">Name</option>
+          </select>
+        </div>
+        <div class="select">
+          <label for="select-sortorder">Sort order:</label>
+          <select id="select-sortorder" name="sortorder" v-model="sortorder">
+            <option :value="true">Ascending</option>
+            <option :value="false">Descending</option>
+          </select>
+        </div>
       </div>
-      <h3>Sortation</h3>
-      <div class="select">
-        <label for="select-sortby">Sort by:</label>
-        <select id="select-sortby" name="sortby" v-model="sortby">
-          <option value="pk">Time of Upload</option>
-          <option value="name">Name</option>
-        </select>
-      </div>
-      <div class="select">
-        <label for="select-sortorder">Sort order:</label>
-        <select id="select-sortorder" name="sortorder" v-model="sortorder">
-          <option :value="true">Ascending</option>
-          <option :value="false">Descending</option>
-        </select>
-      </div>
-    </div>
+    </form>
   </div>
 </template>
 
@@ -76,12 +75,21 @@
   overflow-y: scroll
 .searchbar
   $search-btn-width: 80px
+  display: grid
+  // column-gap: 8px
+  grid-template-columns: auto auto
+  align-items: center
 
   .searchbtn
-    width: $search-btn-width
+    // width: $search-btn-width
+    margin-left: 8px
 
   .searchbox
-    width: calc(100% - $search-btn-width - base.$element-space)
+    width: 100%
+    // width: calc(100% - $search-btn-width - base.$element-space)
+
+  input
+    margin: 0
 </style>
 
 <script lang="ts">
@@ -104,7 +112,8 @@ export default defineComponent({
     searchname: "",
   }),
   methods: {
-    onSearch() {
+    onSearch(e: Event) {
+      e.preventDefault();
       this.searchHandler({
         name: this.searchname,
         sortby: this.sortby,

@@ -15,8 +15,11 @@
   </div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  name: "UploadProgressModal",
   props: {
     isVisible: {
       type: Boolean,
@@ -40,7 +43,7 @@ export default {
       return `${baseStyle} background-color: #6699CC;`;
     },
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

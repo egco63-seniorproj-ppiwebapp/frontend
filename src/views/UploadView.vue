@@ -158,11 +158,13 @@
   </div>
 </template>
 
-<script>
-import ModalComponent from "../components/ModalComponent.vue";
-import UploadProgressModal from "../components/UploadProgressModal.vue";
+<script lang="ts">
+import { defineComponent } from "vue";
+import ModalComponent from "@/components/ModalComponent.vue";
+import UploadProgressModal from "@/components/UploadProgressModal.vue";
 import axios from "axios";
-export default {
+export default defineComponent({
+  name: "UploadView",
   components: {
     ModalComponent,
     UploadProgressModal,
@@ -491,7 +493,7 @@ export default {
       );
     },
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

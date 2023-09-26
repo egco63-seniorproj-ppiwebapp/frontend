@@ -1,6 +1,6 @@
 @use 'base'
 
-$fill-button: 0 -60px 0 30px inset
+$fill-button: 0 -6em 0 3em inset
 
 // Button Base
 input[type="button"], input[type="submit"], button
@@ -11,11 +11,11 @@ input[type="button"], input[type="submit"], button
   transition: 0.1s ease-out
 
   &:hover
-    box-shadow: 0 20px 8px -20px rgba(base.$shadow-color, 0.2) inset, $fill-button rgba(base.$shadow-color, 0.1)
+    box-shadow: 0 2em 8px -2em rgba(base.$shadow-color, 0.2) inset, $fill-button rgba(base.$shadow-color, 0.1)
     cursor: pointer
 
   &:active
-    box-shadow: 0 15px 8px -20px rgba(base.$shadow-color, 0.2) inset, $fill-button rgba(base.$shadow-color, 0.25)
+    box-shadow: 0 1.5em 8px -2em rgba(base.$shadow-color, 0.2) inset, $fill-button rgba(base.$shadow-color, 0.25)
 
   &:focus
     @include base.focus-outline
@@ -38,10 +38,10 @@ input[type="button"], input[type="submit"], button
     &:hover
       background: base.$default-color
       color: base.$invert-font-color
-      box-shadow: 0 20px 8px -20px rgba(base.$shadow-color, 0.2) inset
+      box-shadow: 0 2em 8px -2em rgba(base.$shadow-color, 0.2) inset
 
     &:active
-      box-shadow: 0 15px 8px -20px rgba(base.$shadow-color, 0.2) inset, $fill-button rgba(base.$shadow-color, 0.15)
+      box-shadow: 0 1.5em 8px -2em rgba(base.$shadow-color, 0.2) inset, $fill-button rgba(base.$shadow-color, 0.15)
 
     &:disabled
       box-shadow: none

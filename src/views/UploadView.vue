@@ -158,7 +158,7 @@
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import { defineComponent } from "vue";
 import ModalComponent from "@/components/ModalComponent.vue";
 import UploadProgressModal from "@/components/UploadProgressModal.vue";

@@ -1,7 +1,7 @@
 <template>
   <div class="homebody">
     <div class="counters">
-      <h3>Label Summary</h3>
+      <h2>Upload Counts</h2>
       <div class="counter-group">
         <div class="counter-item">
           <div class="title">
@@ -29,23 +29,26 @@
         </div>
       </div>
     </div>
-    <div class="donut donut1">
-      <h2 class="donut-title">{{ "All users" }}</h2>
-      <Doughnut
-        :data="donut1.data"
-        :options="(donut1.options as any)"
-        v-if="dataReady && ready"
-      />
-      <LoadSpinner v-else style="height: 220px; margin-bottom: 100px" />
-    </div>
-    <div class="donut donut2">
-      <h2 class="donut-title">{{ "Yours" }}</h2>
-      <Doughnut
-        :data="donut2.data"
-        :options="(donut2.options as any)"
-        v-if="dataReady && ready"
-      />
-      <LoadSpinner v-else style="height: 220px; margin-bottom: 100px" />
+    <div class="donuts">
+      <h2>Label Summary</h2>
+      <div class="donut donut1">
+        <h3 class="donut-title">{{ "All users" }}</h3>
+        <Doughnut
+          :data="donut1.data"
+          :options="(donut1.options as any)"
+          v-if="dataReady && ready"
+        />
+        <LoadSpinner v-else style="height: 220px; margin-bottom: 100px" />
+      </div>
+      <div class="donut donut2">
+        <h3 class="donut-title">{{ "Yours" }}</h3>
+        <Doughnut
+          :data="donut2.data"
+          :options="(donut2.options as any)"
+          v-if="dataReady && ready"
+        />
+        <LoadSpinner v-else style="height: 220px; margin-bottom: 100px" />
+      </div>
     </div>
     <div class="trend">
       <div class="trend-title">
@@ -164,7 +167,7 @@ span.callout
   display: grid
   grid-template-columns: 340px auto auto
   grid-template-rows: 380px 200px
-  grid-template-areas: "counter donut1 donut2" "trend trend trend"
+  grid-template-areas: "counter donuts donuts" "trend trend trend"
   height: 100%
   min-width: 800px
   column-gap: 20px
@@ -175,7 +178,7 @@ span.callout
   grid-area: counter
   display: flex
   flex-flow: column
-  margin-top: 20px
+  // margin-top: 20px
   margin-right: 40px
 
 .counter-group
@@ -208,9 +211,22 @@ span.callout
 .donut
   width: 320px
   margin: auto 0
-  margin-bottom: 0px
+  margin-bottom: -20px
   position: relative
 
+.donuts
+  display: grid
+  grid-template-columns: auto auto
+  grid-template-rows: auto auto
+  grid-template-areas: "header header" "donut1 donut2"
+  height: 100%
+  column-gap: 20px
+  grid-area: donuts
+  margin-left: 20px
+
+  &>h2
+    grid-area: header
+    margin-left: -20px
 .donut1
   grid-area: donut1
 .donut2
@@ -219,9 +235,9 @@ span.callout
 
 .donut-title
   top: 50%
-  left: 50%
+  left: calc(50%)
   position: absolute
-  transform: translate(-50%, -100%)
+  transform: translate(-50%, -125%)
 .trend
   grid-area: trend
   display: flex

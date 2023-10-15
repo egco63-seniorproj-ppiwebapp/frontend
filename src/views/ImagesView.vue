@@ -6,6 +6,13 @@
     <div class="gallery">
       <LoadSpinner v-if="!renderGallery" />
       <ImageGrid :images="images" v-else-if="images.length > 0" />
+      <div class="empty-gallery" v-else-if="searched">
+        <span style="font-size: 100px"
+          ><font-awesome-icon :icon="['fas', 'magnifying-glass']"
+        /></span>
+        <h2>No match found</h2>
+        <p>Sorry, We couldn't find any matching results.</p>
+      </div>
       <div class="empty-gallery" v-else>
         <span style="font-size: 100px"
           ><font-awesome-icon :icon="['fas', 'wind']"
@@ -78,6 +85,7 @@ export default defineComponent({
       start: 0,
       end: 20,
     },
+    searched: false,
   }),
   created() {
     this.$watch(
@@ -96,13 +104,15 @@ export default defineComponent({
       this.renderGallery = true;
       this.$store.commit("resetGalleryReload");
     },
-    search(params: SearchParameters) {
+    async search(params: SearchParameters) {
       this.searchParams.name = params.name;
       this.searchParams.footlabel = params.footlabel;
       this.searchParams.footside = params.footside;
       this.searchParams.sortby = params.sortby;
       this.searchParams.ascending = params.ascending;
-      this.reloadGallery();
+      this.searched = false;
+      await this.reloadGallery();
+      this.searched = true;
     },
     serializeSearchParams() {
       const { name, footlabel, footside, sortby, ascending } =

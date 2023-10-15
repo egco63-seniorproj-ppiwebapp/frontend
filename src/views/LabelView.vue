@@ -7,6 +7,11 @@
         draggable="false"
         :style="{ display: isLoading ? 'none' : 'block' }"
       />
+      <div class="delete-btn-wrapper">
+        <button class="delete-btn" @click="deleteImage">
+          <font-awesome-icon :icon="['fas', 'trash-can']" />
+        </button>
+      </div>
       <LoadSpinner v-if="isLoading" />
     </div>
     <div class="panel">
@@ -142,6 +147,23 @@
 
 <style lang="sass" scoped>
 @use '@/assets/styles/base'
+.delete-btn-wrapper
+  width: 4em
+  height: 4em
+  position: absolute
+  bottom: 0
+  left: 0
+  display: flex
+  justify-content: center
+  align-items: center
+  background-color: rgba(white, 0.65)
+  border-top-right-radius: 6px
+.delete-btn
+  width: 3em
+  height: 3em
+  $color: #eb6568
+  background-color: $color
+  outline-color: rgba($color, 0.5)
 
 .empty
   height: 100%
@@ -160,6 +182,7 @@
   display: grid
   grid-template-columns: auto 40%
 .imgcontainer
+  position: relative
   height: calc(100vh - 170px)
   img
     width: 100%
@@ -309,6 +332,7 @@ export default defineComponent({
   },
   methods: {
     async load() {
+      this.isLoading = true;
       const validParams = new URLSearchParams();
       validParams.append("start", "0");
       validParams.append("end", "1");
@@ -326,6 +350,7 @@ export default defineComponent({
 
       this.imgmeta = imgMetaList[0];
       this.imgdata = parseImageMetadata(this.imgmeta);
+      this.isLoading = false;
     },
     setErrorImg(e: Event) {
       const el = e.target as HTMLImageElement;
@@ -396,9 +421,7 @@ export default defineComponent({
       if (res.status == 200) {
         this.setStateSaved();
         this.saveStatusTimeout();
-        this.isLoading = true;
         await this.load();
-        this.isLoading = false;
         this.$forceUpdate();
       } else this.setStateError();
     },
@@ -417,6 +440,21 @@ export default defineComponent({
         remark: "",
         deleted: false,
       };
+    },
+    async deleteImage() {
+      if (!confirm("Do you want to delete this image?")) return;
+
+      const res = await handleAxiosResponse(() =>
+        axios.patch("/api/patch_collection", {
+          id: this.imgmeta.id,
+          deleted: true,
+        })
+      );
+      if (res.status == 200) {
+        alert("Image is successfully deleted.");
+        await this.load();
+        this.$forceUpdate();
+      } else alert("Failed to delete image.");
     },
     handleConfirm() {
       if (this.routeNext) {

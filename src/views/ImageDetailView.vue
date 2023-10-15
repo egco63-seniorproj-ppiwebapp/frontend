@@ -3,6 +3,11 @@
     <div class="window">
       <div class="imgcontainer">
         <img :src="imgdata.img" @error="setErrorImg" draggable="false" />
+        <div class="delete-btn-wrapper">
+          <button class="delete-btn" @click="deleteImage">
+            <font-awesome-icon :icon="['fas', 'trash-can']" />
+          </button>
+        </div>
       </div>
       <div class="panel">
         <div class="imgname">
@@ -126,7 +131,23 @@
 
 <style lang="sass" scoped>
 @use '@/assets/styles/base'
-
+.delete-btn-wrapper
+  width: 4em
+  height: 4em
+  position: absolute
+  bottom: 0
+  left: 0
+  display: flex
+  justify-content: center
+  align-items: center
+  background-color: rgba(white, 0.65)
+  border-top-right-radius: 6px
+.delete-btn
+  width: 3em
+  height: 3em
+  $color: #eb6568
+  background-color: $color
+  outline-color: rgba($color, 0.5)
 .labelcontainer
   position: fixed
   width: 100%
@@ -146,6 +167,7 @@
     display: grid
     grid-template-columns: auto 400px
 .imgcontainer
+  position: relative
   height: calc(100vh - 170px)
   img
     width: 100%
@@ -392,6 +414,21 @@ export default defineComponent({
         remark: "",
         deleted: false,
       };
+    },
+    async deleteImage() {
+      if (!confirm("Do you want to delete this image?")) return;
+
+      const res = await handleAxiosResponse(() =>
+        axios.patch("/api/patch_collection", {
+          id: this.imgmeta.id,
+          deleted: true,
+        })
+      );
+      if (res.status == 200) {
+        alert("Image is successfully deleted.");
+        this.reloadGallery();
+        this.closeWindow();
+      } else alert("Failed to delete image.");
     },
     handleConfirm() {
       if (this.routeNext) {

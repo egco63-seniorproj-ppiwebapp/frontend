@@ -4,7 +4,7 @@
       <div class="imgcontainer">
         <img :src="imgdata.img" @error="setErrorImg" draggable="false" />
         <div class="delete-btn-wrapper">
-          <button class="delete-btn">
+          <button class="delete-btn" @click="deleteImage">
             <font-awesome-icon :icon="['fas', 'trash-can']" />
           </button>
         </div>
@@ -400,6 +400,21 @@ export default defineComponent({
         remark: "",
         deleted: false,
       };
+    },
+    async deleteImage() {
+      if (!confirm("Do you want to delete this image?")) return;
+
+      const res = await handleAxiosResponse(() =>
+        axios.patch("/api/patch_collection", {
+          id: this.imgmeta.id,
+          deleted: true,
+        })
+      );
+      if (res.status == 200) {
+        alert("Image is successfully deleted.");
+        this.reloadGallery();
+        this.closeWindow();
+      } else alert("Failed to delete image.");
     },
   },
 });

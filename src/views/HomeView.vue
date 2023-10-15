@@ -95,9 +95,11 @@ export default defineComponent({
         this.summary.userUploadCount = data.user_count;
         this.summary.allLabelCount = data.all_label_count;
         this.summary.userLabelCount = data.user_label_count;
-        this.summary.userLabelMonthCount[new Date().getMonth()] = Math.floor(
-          Object.values(data.user_label_count).reduce((a, b) => a + b) / 2.5
-        );
+        // this.summary.userLabelMonthCount[new Date().getMonth()] = Math.floor(
+        //   Object.values(data.user_label_count).reduce((a, b) => a + b) / 2.5
+        // );
+        this.summary.allLabelMonthCount = data.all_label_month_count;
+        this.summary.userLabelMonthCount = data.user_label_month_count;
         return true;
       }
       return false;

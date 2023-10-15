@@ -131,6 +131,13 @@
       </button></router-link
     >
   </div>
+  <ModelTwoButton
+    :isVisible="showModal"
+    headerText="Unsaved Changes"
+    descriptionText="You still have unsaved changes. Do you want to continue?"
+    @confirm="handleConfirm"
+    @cancel="handleCancel"
+  ></ModelTwoButton>
 </template>
 
 <style lang="sass" scoped>
@@ -249,6 +256,8 @@ import { ImageThumbnailData, ImageMetadata } from "@/types";
 import { parseImageMetadata, handleAxiosResponse, sleep } from "@/utils";
 import RadioButton from "@/components/RadioButton.vue";
 import LoadSpinner from "@/components/LoadSpinner.vue";
+import ModelTwoButton from "@/components/ModalTwoButton.vue";
+import { NavigationGuardNext } from "vue-router";
 
 // import images from "@/assets/images.json";
 import axios from "axios";
@@ -260,6 +269,7 @@ export default defineComponent({
   components: {
     RadioButton,
     LoadSpinner,
+    ModelTwoButton,
   },
   data: () => ({
     imgdata: {
@@ -277,6 +287,8 @@ export default defineComponent({
     saveError: false,
     hasUnlabelRemain: true,
     isLoading: false,
+    showModal: false,
+    routeNext: null as NavigationGuardNext | null,
   }),
   created() {
     this.$watch(
@@ -289,12 +301,11 @@ export default defineComponent({
   },
   beforeRouteLeave(to, from, next) {
     if (this.hasChanges) {
-      const doClose = confirm(
-        "You still have unsaved changes. Do you want to cancel?"
-      );
-      if (!doClose) return;
+      this.routeNext = next;
+      this.checkChanges();
+    } else {
+      next();
     }
-    next();
   },
   methods: {
     async load() {
@@ -406,6 +417,21 @@ export default defineComponent({
         remark: "",
         deleted: false,
       };
+    },
+    handleConfirm() {
+      if (this.routeNext) {
+        this.routeNext();
+        this.routeNext = null;
+      }
+      this.showModal = false;
+    },
+    handleCancel() {
+      this.showModal = false;
+    },
+    checkChanges() {
+      if (this.hasChanges) {
+        this.showModal = true;
+      }
     },
   },
 });

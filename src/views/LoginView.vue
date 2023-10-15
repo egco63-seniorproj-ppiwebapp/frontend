@@ -16,6 +16,7 @@
         v-model="password"
         required
       />
+      <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
       <input type="submit" class="primary submit" value="Login" />
     </form>
   </div>
@@ -30,6 +31,7 @@ export default defineComponent({
   data: () => ({
     username: "",
     password: "",
+    errorMessage: "",
   }),
   methods: {
     async onSubmit(e: Event) {
@@ -40,10 +42,9 @@ export default defineComponent({
       };
       let isSuccess = await this.$store.dispatch("login", authdata);
       if (isSuccess) {
-        alert("Logged on!");
         this.$router.push("/");
       } else {
-        alert("Incorrect username or password");
+        this.errorMessage = "Incorrect username or password";
       }
     },
   },
@@ -52,6 +53,10 @@ export default defineComponent({
 
 <style lang="sass" scoped>
 @use '@/assets/styles/base'
+
+.error-message
+  color: red
+  margin-bottom: 20px
 
 .container
   display: flex

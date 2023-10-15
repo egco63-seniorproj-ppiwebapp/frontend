@@ -10,7 +10,7 @@ export interface SearchParameters {
   sortby: string;
   ascending: boolean;
   footside: string;
-  footlabel: string;
+  footlabel: string | string[];
 }
 
 export interface ImageMetadata {

@@ -7,6 +7,7 @@
           type="text"
           placeholder="Image names"
           v-model="searchname"
+          name="searchname"
         />
         <button class="primary searchbtn" type="submit">
           <font-awesome-icon :icon="['fas', 'magnifying-glass']" /> Search
@@ -24,13 +25,13 @@
         </div>
         <div class="select">
           <label for="select-label">Label:</label>
-          <select id="select-label" name="footlabel" v-model="footlabel">
-            <option value="">Any</option>
-            <option value="N">Normal</option>
-            <option value="H">High</option>
-            <option value="F">Flat</option>
-            <option value="U">Unlabel</option>
-          </select>
+          <CheckableDropdown
+            name="footlabel"
+            id="select-label"
+            :valpair="{ U: 'Unlabel', F: 'Flat', N: 'Normal', H: 'High' }"
+            has-any
+            class="select"
+          />
         </div>
         <h3><font-awesome-icon :icon="['fas', 'arrow-up-z-a']" /> Sortation</h3>
         <div class="select">
@@ -61,7 +62,7 @@
   justify-content: space-between
   align-items: center
 
-  select
+  select, .select
     width: 70%
 
 .panel
@@ -95,9 +96,11 @@
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
 import { SearchParameters } from "@/types";
+import CheckableDropdown from "@/components/CheckableDropdown.vue";
 
 export default defineComponent({
   name: "ImageSearch",
+  components: { CheckableDropdown },
   props: {
     searchHandler: {
       type: Function as PropType<(param: SearchParameters) => void>,
@@ -114,12 +117,20 @@ export default defineComponent({
   methods: {
     onSearch(e: Event) {
       e.preventDefault();
+      const data = new FormData(e.currentTarget as HTMLFormElement);
+      const dict: Record<string, any> = {};
+      for (const [key, value] of data) {
+        if (dict[key]) {
+          if (typeof dict[key] != "object") dict[key] = [dict[key]];
+          dict[key].push(value);
+        } else dict[key] = value;
+      }
       this.searchHandler({
-        name: this.searchname,
-        sortby: this.sortby,
-        ascending: this.sortorder,
-        footlabel: this.footlabel,
-        footside: this.footside,
+        name: dict.searchname,
+        sortby: dict.sortby,
+        ascending: JSON.parse(dict.sortorder),
+        footlabel: dict.footlabel,
+        footside: dict.footside,
       });
     },
   },

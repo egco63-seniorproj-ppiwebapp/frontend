@@ -69,7 +69,7 @@ export default defineComponent({
     images: [] as Array<ImageThumbnailData>,
     searchParams: {
       name: "",
-      footlabel: "",
+      footlabel: "" as string | string[],
       footside: "",
       sortby: "pk",
       ascending: false,
@@ -116,7 +116,13 @@ export default defineComponent({
       if (name.length > 0) validParams.append("search", name);
       if (sortby.length > 0) validParams.append("sort", sortby);
 
-      if (footlabel.length > 0) validParams.append("filter", footlabel);
+      if (footlabel.length > 0) {
+        if (typeof footlabel == "string")
+          validParams.append("filter", footlabel);
+        else {
+          for (const label of footlabel) validParams.append("filter", label);
+        }
+      }
       if (footside.length > 0) validParams.append("filter", footside);
 
       return validParams;

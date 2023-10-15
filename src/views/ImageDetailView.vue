@@ -115,6 +115,13 @@
       </div>
     </div>
   </div>
+  <ModelTwoButton
+    :isVisible="showModal"
+    headerText="Unsaved Changes"
+    descriptionText="You still have unsaved changes. Do you want to continue?"
+    @confirm="handleConfirm"
+    @cancel="handleCancel"
+  ></ModelTwoButton>
 </template>
 
 <style lang="sass" scoped>
@@ -234,6 +241,8 @@ import { defineComponent } from "vue";
 import { ImageThumbnailData, ImageMetadata } from "@/types";
 import { parseImageMetadata, handleAxiosResponse } from "@/utils";
 import RadioButton from "@/components/RadioButton.vue";
+import ModelTwoButton from "@/components/ModalTwoButton.vue";
+import { NavigationGuardNext } from "vue-router";
 
 // import images from "@/assets/images.json";
 import router from "@/router";
@@ -245,6 +254,7 @@ export default defineComponent({
   name: "LabelView",
   components: {
     RadioButton,
+    ModelTwoButton,
   },
   data: () => ({
     imgdata: {
@@ -260,6 +270,8 @@ export default defineComponent({
     isSaved: false,
     isSaving: false,
     saveError: false,
+    showModal: false,
+    routeNext: null as NavigationGuardNext | null,
   }),
   created() {
     this.$watch(
@@ -269,6 +281,14 @@ export default defineComponent({
       },
       { immediate: true }
     );
+  },
+  beforeRouteLeave(to, from, next) {
+    if (this.hasChanges) {
+      this.routeNext = next;
+      this.checkChanges();
+    } else {
+      next();
+    }
   },
   methods: {
     async load() {
@@ -291,12 +311,6 @@ export default defineComponent({
       el.src = errorImage;
     },
     closeWindow() {
-      if (this.hasChanges) {
-        const doClose = confirm(
-          "You still have unsaved changes. Do you want to cancel?"
-        );
-        if (!doClose) return;
-      }
       router.push("/images");
     },
     reloadGallery() {
@@ -378,6 +392,21 @@ export default defineComponent({
         remark: "",
         deleted: false,
       };
+    },
+    handleConfirm() {
+      if (this.routeNext) {
+        this.routeNext();
+        this.routeNext = null;
+      }
+      this.showModal = false;
+    },
+    handleCancel() {
+      this.showModal = false;
+    },
+    checkChanges() {
+      if (this.hasChanges) {
+        this.showModal = true;
+      }
     },
   },
 });

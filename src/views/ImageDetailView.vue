@@ -3,6 +3,11 @@
     <div class="window">
       <div class="imgcontainer">
         <img :src="imgdata.img" @error="setErrorImg" draggable="false" />
+        <div class="delete-btn-wrapper">
+          <button class="delete-btn">
+            <font-awesome-icon :icon="['fas', 'trash-can']" />
+          </button>
+        </div>
       </div>
       <div class="panel">
         <div class="imgname">
@@ -119,7 +124,23 @@
 
 <style lang="sass" scoped>
 @use '@/assets/styles/base'
-
+.delete-btn-wrapper
+  width: 4em
+  height: 4em
+  position: absolute
+  bottom: 0
+  left: 0
+  display: flex
+  justify-content: center
+  align-items: center
+  background-color: rgba(white, 0.65)
+  border-top-right-radius: 6px
+.delete-btn
+  width: 3em
+  height: 3em
+  $color: #eb6568
+  background-color: $color
+  outline-color: rgba($color, 0.5)
 .labelcontainer
   position: fixed
   width: 100%
@@ -139,6 +160,7 @@
     display: grid
     grid-template-columns: auto 400px
 .imgcontainer
+  position: relative
   height: calc(100vh - 170px)
   img
     width: 100%

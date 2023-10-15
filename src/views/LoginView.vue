@@ -16,20 +16,34 @@
         v-model="password"
         required
       />
+      <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
       <input type="submit" class="primary submit" value="Login" />
     </form>
+    <ModalComponent
+      :isVisible="showModal"
+      headerText="Oops!"
+      :descriptionText="modalMessage"
+      @close="closeModal"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { AuthData } from "@/types";
 import { defineComponent } from "vue";
+import ModalComponent from "@/components/ModalComponent.vue";
 
 export default defineComponent({
   name: "LoginView",
+  components: {
+    ModalComponent,
+  },
   data: () => ({
     username: "",
     password: "",
+    errorMessage: "",
+    showModal: false,
+    modalMessage: "",
   }),
   methods: {
     async onSubmit(e: Event) {
@@ -38,13 +52,21 @@ export default defineComponent({
         username: this.username,
         password: this.password,
       };
-      let isSuccess = await this.$store.dispatch("login", authdata);
-      if (isSuccess) {
-        alert("Logged on!");
-        this.$router.push("/");
-      } else {
-        alert("Incorrect username or password");
+      try {
+        let isSuccess = await this.$store.dispatch("login", authdata);
+        if (isSuccess) {
+          this.$router.push("/");
+        } else {
+          this.errorMessage = "Incorrect username or password";
+        }
+      } catch (error) {
+        this.modalMessage =
+          "There was a problem logging in. Please try again or contact our support team.";
+        this.showModal = true;
       }
+    },
+    closeModal() {
+      this.showModal = false;
     },
   },
 });
@@ -52,6 +74,10 @@ export default defineComponent({
 
 <style lang="sass" scoped>
 @use '@/assets/styles/base'
+
+.error-message
+  color: red
+  margin-bottom: 20px
 
 .container
   display: flex

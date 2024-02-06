@@ -101,7 +101,7 @@ export default defineComponent({
       return false;
     },
     vectorizeLabelCount(count: typeof this.summary.allLabelCount) {
-      return [count.U, count.N, count.F, count.H];
+      return [count.U, count.F, count.N, count.H];
     },
   },
   async mounted() {

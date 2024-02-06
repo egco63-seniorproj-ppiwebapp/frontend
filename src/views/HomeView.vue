@@ -10,12 +10,8 @@
       <SummaryView
         style="padding-right: 50px"
         :data-ready="dataReady"
-        :all-label-count="
-          Object.values(summary.allLabelCount).map((x) => x + 0)
-        "
-        :user-label-count="
-          Object.values(summary.userLabelCount).map((x) => x + 0)
-        "
+        :all-label-count="vectorizeLabelCount(summary.allLabelCount)"
+        :user-label-count="vectorizeLabelCount(summary.userLabelCount)"
         :all-label-month-count="summary.allLabelMonthCount"
         :user-label-month-count="summary.userLabelMonthCount"
       />
@@ -95,12 +91,17 @@ export default defineComponent({
         this.summary.userUploadCount = data.user_count;
         this.summary.allLabelCount = data.all_label_count;
         this.summary.userLabelCount = data.user_label_count;
-        this.summary.userLabelMonthCount[new Date().getMonth()] = Math.floor(
-          Object.values(data.user_label_count).reduce((a, b) => a + b) / 2.5
-        );
+        // this.summary.userLabelMonthCount[new Date().getMonth()] = Math.floor(
+        //   Object.values(data.user_label_count).reduce((a, b) => a + b) / 2.5
+        // );
+        this.summary.allLabelMonthCount = data.all_label_month_count;
+        this.summary.userLabelMonthCount = data.user_label_month_count;
         return true;
       }
       return false;
+    },
+    vectorizeLabelCount(count: typeof this.summary.allLabelCount) {
+      return [count.U, count.F, count.N, count.H];
     },
   },
   async mounted() {

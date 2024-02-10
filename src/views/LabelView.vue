@@ -2,7 +2,7 @@
   <div class="labelcontainer" v-if="hasUnlabelRemain">
     <div class="imgcontainer">
       <img
-        :src="imgdata.img"
+        :src="`${imgdata.img}?sz=600`"
         @error="setErrorImg"
         draggable="false"
         :style="{ display: isLoading ? 'none' : 'block' }"

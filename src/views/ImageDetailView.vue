@@ -2,7 +2,11 @@
   <div class="labelcontainer">
     <div class="window">
       <div class="imgcontainer">
-        <img :src="imgdata.img" @error="setErrorImg" draggable="false" />
+        <img
+          :src="`${imgdata.img}?sz=600`"
+          @error="setErrorImg"
+          draggable="false"
+        />
         <div class="delete-btn-wrapper">
           <button class="delete-btn" @click="deleteImage">
             <font-awesome-icon :icon="['fas', 'trash-can']" />

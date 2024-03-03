@@ -84,7 +84,7 @@ export default defineComponent({
 
     &::after
       position: relative
-      content: "⬤"
+      content: "\2B24"
       font-size: 14px
       margin: 2px
       text-align: center

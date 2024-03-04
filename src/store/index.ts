@@ -4,6 +4,9 @@ import axios from "axios";
 import { InjectionKey, State } from "vue";
 import { Store, createStore } from "vuex";
 
+axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
+axios.defaults.xsrfCookieName = "csrftoken";
+
 export const key: InjectionKey<Store<State>> = Symbol();
 
 export default createStore({
@@ -45,7 +48,7 @@ export default createStore({
     },
     async logout(ctx) {
       if (!ctx.getters.isAuthenticated) return true;
-      const res = await handleAxiosResponse(() => axios.get("/api/logout"));
+      const res = await handleAxiosResponse(() => axios.post("/api/logout"));
       if (res.status == 200) {
         ctx.commit("resetUser");
         return true;
@@ -53,7 +56,7 @@ export default createStore({
       return false;
     },
     async session(ctx) {
-      const res = await handleAxiosResponse(() => axios.get("/api/session"));
+      const res = await handleAxiosResponse(() => axios.post("/api/session"));
       if (res.status == 200) {
         const username = res.data as string;
         ctx.commit("setUser", username);

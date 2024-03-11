@@ -1,501 +1,363 @@
 <template>
-  <div class="grid-container">
-    <div class="flex-2-head">
-      <font-awesome-icon
-        class="fa-icon"
-        icon="folder-plus"
-        :style="{ color: '#62aa92' }"
+  <div class="container">
+    <div class="header">
+      <h1>
+        <font-awesome-icon
+          class="fa-icon"
+          icon="folder-plus"
+          style="color: #62aa92; margin-right: 8px"
+        />Import your Image Files
+      </h1>
+    </div>
+    <div class="body">
+      <DropFileMultiple
+        ref="fileLoader"
+        @choose="onChoose()"
+        @ready="onReady()"
+        @listupdate="onUpdate()"
       />
-      <h1>Import your Image Files</h1>
-      <!-- <input
-        type="button"
-        value="switch event"
+    </div>
+    <div class="control" v-if="state == UploadStatus.WAITING">
+      <button class="outline secondary" @click="modal.cancelUpload = true">
+        <font-awesome-icon :icon="['fas', 'ban']" />
+        <span>Cancel</span>
+      </button>
+      <button
         class="primary"
-        @click="toggleUpload"
+        @click="handleUpload()"
+        :disabled="disabledUpload"
+      >
+        <font-awesome-icon :icon="['fas', 'file-arrow-up']" />
+        <span>Upload All</span>
+      </button>
+    </div>
+    <div class="control" v-if="state == UploadStatus.UPLOADING">
+      <button class="secondary outline" @click="modal.abortUpload = true">
+        <font-awesome-icon :icon="['fas', 'ban']" />
+        <span>Cancel</span>
+      </button>
+      <span>Uploading </span>
+      <font-awesome-icon
+        class="status-icon spinner"
+        :icon="['fas', 'fa-circle-notch']"
       />
-      uploadProgress {{ uploadProgress }} progressPerChunk
-      {{ progressPerChunk }} -->
     </div>
-    <div class="col"></div>
-    <div class="col-6-upload">
-      <div class="drop-area" @dragover.prevent @drop.prevent="handleFileDrop">
-        <div class="drop-message-unupload" v-if="!isUploading">
-          <div class="drop-text">
-            <span class="bold-text-drop">Drop your Image files here</span>
-          </div>
-          <div class="drop-area-content">
-            <p class="p-margin">
-              <font-awesome-icon
-                :icon="['far', 'file-image']"
-                :style="{ color: '#d6d6d6' }"
-                size="6x"
-              />
-            </p>
-            <p class="p-margin">
-              <span class="gray-text">Image file type .jpeg, .jpg, .png </span>
-              <!-- <span class="underline">other similar</span>
-              <span class="gray-text"> file types</span> -->
-            </p>
-            <p class="p-margin">
-              <span class="or-line">or</span>
-            </p>
-            <p class="p-margin">
-              <input
-                type="file"
-                ref="fileInput"
-                @change="fileInputChange"
-                style="display: none"
-                accept=".jpeg,.jpg,.png"
-                multiple
-              />
-              <input
-                type="button"
-                value="Import Files"
-                class="primary"
-                @click="triggerFileInput"
-              />
-            </p>
-          </div>
-        </div>
-        <div class="drop-message-isupload" v-if="isUploading">
-          <div class="upload-text">
-            <span class="bold-text-upload">uploading....</span>
-          </div>
-          <div class="file-info">
-            <span style="font-size: 16px; font-family: Arial, sans-serif"
-              >Total files: {{ totalFiles }}</span
-            >
-          </div>
-          <div class="uploading-file">
-            <div
-              v-for="(file, index) in uploadingFiles"
-              :key="file.name"
-              class="file-upload-container"
-            >
-              <div class="file-name-container">
-                <span
-                  class="file-name"
-                  style="font-size: 16px; font-family: Arial, sans-serif"
-                >
-                  {{ file.name }}
-                </span>
-              </div>
-
-              <div class="progress-bar-container">
-                <div class="progress">
-                  <div
-                    class="progress-bar progress-bar-striped"
-                    role="progressbar"
-                    :style="progressBarStyle(file)"
-                    :aria-valuenow="file.progress"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                  ></div>
-                </div>
-                <font-awesome-icon
-                  v-if="file.isLabeled"
-                  :icon="['fas', 'tags']"
-                  style="color: #62aa92; margin-right: 25px"
-                />
-              </div>
-
-              <div :class="['cancel-icon', file.isCancelled ? 'disabled' : '']">
-                <font-awesome-icon
-                  v-if="!file.isCancelled"
-                  :icon="['fas', 'circle-xmark']"
-                  style="color: #ff0000"
-                  class="cancelable-icon"
-                  @click="cancelUpload(index)"
-                />
-                <font-awesome-icon
-                  v-else-if="file.isCancelled"
-                  :icon="['fas', 'circle-xmark']"
-                  style="color: #f49a9a"
-                  class="canceled-icon"
-                />
-              </div>
-            </div>
-          </div>
-          <div class="apply-upload">
-            <input
-              type="button"
-              value="upload all"
-              class="primary"
-              @click="uploadAll"
-              :disabled="
-                checkAllFilesCancelled() || !isAllUploaded || isUploadingAll
-              "
-              :style="
-                !isAllUploaded || isUploadingAll
-                  ? { cursor: 'not-allowed' }
-                  : { cursor: 'pointer' }
-              "
-            />
-          </div>
-        </div>
-      </div>
+    <div class="control" v-if="state == UploadStatus.COMPLETE">
+      <button class="secondary outline" @click="handleRetry()" v-if="hasError">
+        <font-awesome-icon :icon="['fas', 'rotate-right']" />
+        <span>Retry</span>
+      </button>
+      <button class="primary outline" @click="handleNewFiles()">
+        <font-awesome-icon :icon="['fas', 'file']" />
+        <span>Import New Files</span>
+      </button>
+      <button class="primary" @click="handleGotoLabel()">
+        <font-awesome-icon :icon="['fas', 'tag']" />
+        <span>Go to Label</span>
+      </button>
     </div>
-    <div class="col"></div>
-
-    <div class="flex-2-footer"></div>
-    <ModalComponent
-      :isVisible="showModalreload"
-      :headerText="modalHeaderText"
-      :descriptionText="modalMessage"
-      @close="closeModalAndRefresh"
-    />
-    <ModalComponent
-      :isVisible="showModal"
-      :headerText="modalHeaderText"
-      :descriptionText="modalMessage"
-      @close="closeModal"
-    />
-    <UploadProgressModal
-      :isVisible="isUploadingAll"
-      :progress="uploadProgressBar"
-      headerText="uploading to Database"
-    />
   </div>
+  <ModalTwoButton
+    :isVisible="modal.ignoreError"
+    headerText="Upload Confirmation"
+    descriptionText="Do you want to ignore all error files and continue uploading?"
+    primaryBtn="Ignore & Continue"
+    secondaryBtn="Back"
+    @confirm="handleIgnoreError"
+    @cancel="modal.ignoreError = false"
+  />
+  <ModalTwoButton
+    :isVisible="modal.cancelUpload"
+    headerText="Upload Cancellation"
+    descriptionText="Do you want to continue and cancel all of selected files?"
+    primaryBtn="Yes"
+    secondaryBtn="No"
+    @confirm="handleCancelUpload()"
+    @cancel="
+      routeNext = null;
+      modal.cancelUpload = false;
+    "
+  />
+  <ModalTwoButton
+    :isVisible="modal.abortUpload"
+    headerText="Upload Cancellation"
+    descriptionText="Files are still being uploaded. Do you want to stop uploading?"
+    primaryBtn="Yes"
+    secondaryBtn="No"
+    @confirm="handleAbortUpload()"
+    @cancel="
+      routeNext = null;
+      modal.abortUpload = false;
+    "
+  />
+  <ModalComponent
+    :isVisible="modal.errorUpload"
+    headerText="Error occured!"
+    descriptionText="Some of the files are failed to upload."
+    @close="modal.errorUpload = false"
+  />
 </template>
 
-<script>
+<style lang="sass" scoped>
+.container
+  margin: 0 auto
+  max-width: 1000px
+  display: grid
+  grid-template-areas: "header control" "body body"
+  grid-template-columns: auto auto
+
+.header
+  grid-area: header
+.body
+  grid-area: body
+  padding-right: 12px
+  margin-right: -12px
+  overflow-y: auto
+  height: calc(100vh - 220px)
+.control
+  grid-area: control
+  margin: auto
+  margin-right: 0
+
+  button span
+    margin-left: 6px
+
+@keyframes spin
+  0%
+    transform: rotate(0deg)
+  100%
+    transform: rotate(360deg)
+
+.spinner
+  animation: spin 1.2s linear infinite
+</style>
+
+<script lang="ts">
 import { defineComponent } from "vue";
+import DropFileMultiple from "@/components/DropFileMultiple.vue";
+import ModalTwoButton from "@/components/ModalTwoButton.vue";
 import ModalComponent from "@/components/ModalComponent.vue";
-import UploadProgressModal from "@/components/UploadProgressModal.vue";
 import axios from "axios";
+import {
+  ErrorMessage,
+  FileUploadStatus,
+  FileUploadStatusEnum,
+  UploadResponse,
+  UploadStatus,
+  UploadStatusEnum,
+} from "@/types/upload";
+import router from "@/router";
+import { NavigationGuardNext } from "vue-router";
+
 export default defineComponent({
   name: "UploadView",
   components: {
+    DropFileMultiple,
+    ModalTwoButton,
     ModalComponent,
-    UploadProgressModal,
   },
   data() {
     return {
-      isUploading: false,
-      uploadingFiles: [],
-      showModalreload: false,
-      showModal: false,
-      modalMessage: "",
-      modalHeaderText: "เกิดข้อผิดพลาด",
-      fileUploaded: false,
-      modalAction: null,
-      totalFiles: 0,
-      isUploadingAll: false,
-      uploadProgress: 0,
-      progressPerChunk: 0,
-      uploadProgressBar: 0,
+      UploadStatus,
+      state: UploadStatus.NOFILE as UploadStatusEnum,
+      modal: {
+        ignoreError: false,
+        cancelUpload: false,
+        errorUpload: false,
+        abortUpload: false,
+      },
+      disabledUpload: true,
+      hasError: false,
+      abortedUpload: false,
+      abortController: new AbortController(),
+      routeNext: null as NavigationGuardNext | null,
     };
   },
+  beforeRouteLeave(to, from, next) {
+    if (this.state == UploadStatus.UPLOADING) {
+      this.routeNext = next;
+      this.modal.abortUpload = true;
+    } else if (this.state == UploadStatus.WAITING) {
+      this.routeNext = next;
+      this.modal.cancelUpload = true;
+    } else {
+      next();
+    }
+  },
   methods: {
-    async isFileOfType(file, type) {
-      const sliceSize = 4;
-      const slice = file.slice(0, sliceSize);
-
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = (e) => {
-          const bytes = new Uint8Array(e.target.result);
-
-          if (type === "jpg" && bytes[0] === 0xff && bytes[1] === 0xd8) {
-            resolve(true);
-          } else if (
-            type === "png" &&
-            bytes[0] === 0x89 &&
-            bytes[1] === 0x50 &&
-            bytes[2] === 0x4e &&
-            bytes[3] === 0x47
-          ) {
-            resolve(true);
-          } else {
-            resolve(false);
-          }
-        };
-        reader.readAsArrayBuffer(slice);
-      });
+    getFileLoader() {
+      return this.$refs.fileLoader as InstanceType<
+        typeof DropFileMultiple
+      > | null;
     },
-    updateTotalFiles(files) {
-      this.totalFiles = files.length;
+    hasFiles() {
+      let count = this.getFileLoader()?.uploadFiles.length ?? 0;
+      return count > 0;
     },
-    async isValidFile(file) {
-      const validTypes = ["jpg", "png"];
-      for (let type of validTypes) {
-        const isValid = await this.isFileOfType(file, type);
-        if (isValid) return true;
-      }
-      return false;
+    hasFilesWithStatus(status: FileUploadStatusEnum) {
+      const fileLoader = this.getFileLoader();
+      if (!fileLoader) return false;
+      return fileLoader.uploadFiles.some((v) => v.status == status);
     },
-    closeModalAndRefresh() {
-      window.location.reload();
+    onChoose() {
+      this.state = UploadStatus.WAITING;
+      this.disabledUpload = true;
     },
-    closeModal() {
-      this.showModal = false;
+    onReady() {
+      this.disabledUpload = !this.hasFilesWithStatus(FileUploadStatus.WAITING);
+      this.$forceUpdate();
     },
-
-    toggleUpload() {
-      this.isUploading = !this.isUploading;
-    },
-    handleFileDrop(event) {
-      if (this.fileUploaded) {
+    onUpdate() {
+      if (!this.hasFiles()) {
+        this.state = UploadStatus.NOFILE;
         return;
       }
-      const files = event.dataTransfer.items
-        ? Array.from(event.dataTransfer.items).map((item) => item.getAsFile())
-        : Array.from(event.dataTransfer.files);
+      if (this.hasFilesWithStatus(FileUploadStatus.FAILED))
+        this.hasError = true;
+      else this.hasError = false;
+    },
+    async upload() {
+      const fileLoader = this.getFileLoader();
+      if (!fileLoader) return;
 
-      const validationPromises = files.map((file) => this.isValidFile(file));
+      const filesToUpload = fileLoader.uploadFiles.filter(
+        (v) => v.status == FileUploadStatus.WAITING
+      );
 
-      Promise.all(validationPromises).then((validationResults) => {
-        const invalidFiles = validationResults.filter(
-          (result) => !result
-        ).length;
+      filesToUpload.forEach((v) => (v.status = FileUploadStatus.UPLOADING));
 
-        if (invalidFiles > 0) {
-          this.modalMessage =
-            "The files you attempted to upload contain unsupported formats. Only .jpg, .jpeg, and .png files are allowed.<br><br> Please check your selection and try again.";
-          this.modalHeaderText = "Unsupported File Format";
-          this.showModal = true;
-          return;
+      const MAX_UPLOAD_SIZE = 50 * 1024 * 1024; // 50MB
+      const FILE_PER_BATCH = 10;
+
+      let totalLoaded = 0;
+      let totalUploaded = 0;
+      while (totalLoaded < filesToUpload.length) {
+        fileLoader.focus(totalLoaded);
+
+        // Batching files
+        const formData = new FormData();
+        let filesInBatch = 0;
+        let currentUploadSize = 0;
+        while (
+          totalLoaded < filesToUpload.length &&
+          filesInBatch < FILE_PER_BATCH
+        ) {
+          const upload = filesToUpload[totalLoaded];
+          if (upload.file.size + currentUploadSize > MAX_UPLOAD_SIZE) break;
+          totalLoaded++;
+          filesInBatch++;
+          currentUploadSize += upload.file.size;
+          formData.append("file", upload.file);
         }
 
-        this.uploadFile(files);
-        this.fileUploaded = true;
-      });
-    },
-
-    triggerFileInput() {
-      this.$refs.fileInput.click();
-    },
-    fileInputChange(event) {
-      if (this.fileUploaded) {
-        return;
-      }
-
-      const files = Array.from(event.target.files);
-      const originalFileCount = files.length;
-      const validationPromises = files.map((file) => this.isValidFile(file));
-
-      Promise.all(validationPromises).then((validationResults) => {
-        for (let i = validationResults.length - 1; i >= 0; i--) {
-          if (!validationResults[i]) files.splice(i, 1);
-        }
-
-        if (files.length !== originalFileCount) {
-          this.modalMessage =
-            "The files you attempted to upload contain unsupported formats. Only .jpg, .jpeg, and .png files are allowed.<br><br> Please check your selection and try again.";
-          this.modalHeaderText = "Unsupported File Format";
-          this.showModal = true;
-          return;
-        }
-
-        if (files.length > 0) {
-          this.uploadFile(files);
-        }
-
-        this.fileUploaded = true;
-      });
-    },
-    async uploadFile(files) {
-      try {
-        this.isUploading = true;
-
-        files.forEach((file) => {
-          const newFile = {
-            name: file.name,
-            progress: 0,
-            isCancelled: false,
-            isLabeled: false,
-            base64: null,
-          };
-          this.uploadingFiles.push(newFile);
-        });
-
-        this.totalFiles = this.uploadingFiles.length;
-
-        for (let i = 0; i < this.uploadingFiles.length; i++) {
-          await this.convertToBase64(files[i], this.uploadingFiles[i]);
-          await this.simulateUpload(this.uploadingFiles[i]);
-        }
-      } catch (error) {
-        console.error("Error during upload:", error);
-        this.modalMessage =
-          "Sorry, we had trouble processing one of your files. Please try uploading again.";
-        this.modalHeaderText = "File Processing Failed 🚫";
-        this.showModalreload = true;
-      }
-    },
-
-    simulateUpload(file) {
-      return new Promise((resolve) => {
-        const updateProgress = () => {
-          if (file.isCancelled) {
-            resolve();
-            return;
-          }
-          if (file.progress < 100) {
-            this.incrementProgress(file.name);
-            setTimeout(updateProgress, 20);
-          } else {
-            resolve();
-          }
-        };
-        updateProgress();
-      });
-    },
-
-    convertToBase64(file, targetFileObj) {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        targetFileObj.base64 = reader.result.split(",")[1];
-        // console.log(targetFileObj.base64);
-      };
-      reader.onerror = (error) => {
-        console.log("Error converting to base64: ", error);
-      };
-    },
-
-    incrementProgress(fileName) {
-      const fileIndex = this.findFileIndex(fileName);
-      if (fileIndex !== -1 && this.uploadingFiles[fileIndex].progress < 100) {
-        this.uploadingFiles[fileIndex].progress += 10;
-      }
-    },
-    cancelUpload(index) {
-      this.uploadingFiles[index].isCancelled = true;
-      this.totalFiles--;
-    },
-
-    findFileIndex(fileName) {
-      return this.uploadingFiles.findIndex((f) => f.name === fileName);
-    },
-    async uploadAll() {
-      try {
-        this.isUploadingAll = true;
-        this.uploadProgress = 0;
-
-        const maxChunkSize = 5 * 1024 * 1024; // 5MB
-        const maxFilesPerChunk = 10;
-        let chunks = [];
-        let currentChunk = [];
-        let currentChunkSize = 0;
-        let currentFileCount = 0;
-
-        for (let file of this.uploadingFiles) {
-          const fileSize = atob(file.base64).length; // ขนาดของไฟล์ใน byte
-
-          if (
-            currentChunkSize + fileSize <= maxChunkSize &&
-            currentFileCount < maxFilesPerChunk
-          ) {
-            currentChunk.push(file.base64);
-            currentChunkSize += fileSize;
-            currentFileCount++;
-          } else {
-            chunks.push(currentChunk);
-            currentChunk = [file.base64];
-            currentChunkSize = fileSize;
-            currentFileCount = 1;
-          }
-        }
-        if (currentChunk.length) {
-          chunks.push(currentChunk);
-        }
-
-        this.progressPerChunk = 100 / chunks.length;
-
-        let totalResponses = 0;
-        let singleID = null;
-
-        for (let chunk of chunks) {
-          const targetProgress = this.uploadProgress + this.progressPerChunk;
-
-          const response = await axios.post("/api/add_collection", {
-            img_file: chunk,
+        try {
+          // Perform upload with Axios
+          const res = await axios.post("/api/add_collection", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+            signal: this.abortController.signal,
+            onUploadProgress: (e) => {
+              // Update upload progress bar
+              const percentCompleted = Math.round(
+                (e.loaded * 100) / (e.total ?? 1)
+              );
+              for (let i = totalUploaded; i < totalLoaded; i++) {
+                const upload = filesToUpload[i];
+                upload.progress = percentCompleted;
+              }
+            },
           });
 
-          if (response.status !== 200) {
-            throw new Error("Failed to upload some chunks");
+          // Display upload result
+          const resdata = res.data as UploadResponse;
+          for (let i = 0; i < resdata.length; i++) {
+            const { success, err, imgid } = resdata[i];
+            const file = filesToUpload[totalUploaded + i];
+            if (success) {
+              file.status = FileUploadStatus.SUCCESS;
+              file.id = imgid;
+            } else {
+              file.status = FileUploadStatus.FAILED;
+              if (err?.startsWith("Unsupported file type"))
+                file.message = ErrorMessage.UNSUPPORTED;
+              else file.message = ErrorMessage.UPLOADFAILED;
+            }
           }
 
-          this.smoothProgress(targetProgress);
-          this.uploadProgress += this.progressPerChunk;
-          totalResponses++;
-
-          if (response.data.ids.length === 1 && totalResponses === 1) {
-            singleID = response.data.ids[0];
-          } else {
-            singleID = null;
+          totalUploaded = totalLoaded;
+        } catch (err) {
+          for (let i = totalUploaded; i < totalLoaded; i++) {
+            const upload = filesToUpload[i];
+            upload.progress = 0;
+            upload.message = ErrorMessage.UPLOADFAILED;
+            upload.status = FileUploadStatus.FAILED;
           }
+          if (axios.isCancel(err)) return false;
         }
-        setTimeout(() => {
-          if (singleID) {
-            this.$router.push(`/images/id/${singleID}`);
-          } else {
-            this.$router.push("/images");
-          }
-        }, 2500);
-      } catch (error) {
-        console.error("Error during batch upload:", error);
-        this.modalMessage =
-          "Sorry, there was a problem uploading your files. Please try again later.";
-        this.modalHeaderText = "Upload Failed 🚫";
-        this.isUploadingAll = false;
-        this.showModalreload = true;
-      } finally {
-        setTimeout(() => {
-          this.isUploadingAll = false;
-        }, 3000);
+      }
+      return true;
+    },
+    abortUpload() {
+      this.abortedUpload = true;
+      this.abortController.abort();
+      this.abortController = new AbortController();
+    },
+    handleCancelUpload() {
+      this.getFileLoader()?.reset();
+      this.state = UploadStatus.NOFILE;
+      this.modal.cancelUpload = false;
+      this.continueRoute();
+    },
+    async handleUpload() {
+      if (this.hasFilesWithStatus(FileUploadStatus.FAILED)) {
+        this.modal.ignoreError = true;
+        return;
+      }
+      this.hasError = false;
+      this.state = UploadStatus.UPLOADING;
+      await this.upload();
+      this.state = UploadStatus.COMPLETE;
+      if (this.hasFilesWithStatus(FileUploadStatus.FAILED)) {
+        this.hasError = true;
+        this.getFileLoader()?.sortErrorFile();
+        this.getFileLoader()?.focus(0);
+        if (!this.abortedUpload) this.modal.errorUpload = true;
+        else this.abortedUpload = false;
       }
     },
-    smoothProgress(target) {
-      const step = 1;
-      const interval = 20;
-
-      let currentProgress = this.uploadProgress;
-
-      const progressInterval = setInterval(() => {
-        if (currentProgress < target) {
-          currentProgress += step;
-          if (currentProgress > target) currentProgress = target;
-          this.uploadProgressBar = currentProgress;
-        } else {
-          clearInterval(progressInterval);
-        }
-      }, interval);
+    handleIgnoreError() {
+      this.getFileLoader()?.removeError();
+      this.modal.ignoreError = false;
+      this.handleUpload();
     },
-    checkAllFilesCancelled() {
-      if (this.uploadingFiles.every((file) => file.isCancelled)) {
-        this.modalHeaderText = "Cancel Upload";
-        this.modalMessage =
-          "You have canceled the upload of all files. Please press OK to reload the page.";
-        this.showModalreload = true;
-        this.modalAction = this.closeModalAndRefresh;
-        return true;
+    handleRetry() {
+      const fileLoader = this.getFileLoader();
+      if (!fileLoader) return;
+      for (let upload of fileLoader.uploadFiles) {
+        if (upload.status == FileUploadStatus.FAILED) {
+          upload.status = FileUploadStatus.WAITING;
+          upload.message = "";
+          upload.progress = 0;
+        }
       }
-      return false;
+      this.handleUpload();
     },
-  },
-  computed: {
-    progressBarStyle() {
-      return (file) => {
-        let baseStyle = `width: ${file.progress}%`;
-        if (file.isCancelled) {
-          return `${baseStyle}; background-color: red`;
-        } else if (file.progress === 100) {
-          return `${baseStyle}; background-color: green`;
-        }
-        return baseStyle;
-      };
+    handleNewFiles() {
+      this.handleCancelUpload();
     },
-    isAllUploaded() {
-      return this.uploadingFiles.every(
-        (file) => file.progress === 100 || file.isCancelled
-      );
+    handleGotoLabel() {
+      router.push("/label");
+    },
+    handleAbortUpload() {
+      this.abortUpload();
+      this.modal.abortUpload = false;
+      this.continueRoute();
+    },
+    continueRoute() {
+      if (this.routeNext) {
+        this.routeNext();
+        this.routeNext = null;
+      }
     },
   },
 });
 </script>
-
-<style lang="scss" scoped>
-@import "@/assets/styles/UploadView.scss";
-</style>

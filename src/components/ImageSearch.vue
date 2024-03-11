@@ -118,20 +118,22 @@ export default defineComponent({
     onSearch(e: Event) {
       e.preventDefault();
       const data = new FormData(e.currentTarget as HTMLFormElement);
-      const dict: Record<string, any> = {};
+      type QueryValue = (typeof this.$data)[keyof typeof this.$data];
+      const dict: Record<string, QueryValue | QueryValue[]> = {};
       for (const [key, value] of data) {
         if (dict[key]) {
-          if (typeof dict[key] != "object") dict[key] = [dict[key]];
-          dict[key].push(value);
-        } else dict[key] = value;
+          if (typeof dict[key] != "object")
+            dict[key] = [dict[key] as QueryValue];
+          (dict[key] as QueryValue[]).push(value as QueryValue);
+        } else dict[key] = value as QueryValue;
       }
       this.searchHandler({
         name: dict.searchname,
         sortby: dict.sortby,
-        ascending: JSON.parse(dict.sortorder),
+        ascending: JSON.parse(dict.sortorder as string),
         footlabel: dict.footlabel,
         footside: dict.footside,
-      });
+      } as SearchParameters);
     },
   },
 });

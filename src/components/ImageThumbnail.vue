@@ -64,13 +64,13 @@ export default defineComponent({
   display: grid
   grid-template-rows: auto 36px
   overflow: hidden
-  background: #f5f5f5
+  background: #f7fafc
   transition: 0.1s ease-out
   box-shadow: 0 2px 8px -6px rgba(base.$shadow-color, 0.2)
-  border: 1px solid #eeeeee
+  border: 1px solid #e2e8f0
 
   &:hover, &:focus
-    background: #eeeeee
+    background: #eef1f2
     cursor: pointer
     border-color: base.$primary-color
 

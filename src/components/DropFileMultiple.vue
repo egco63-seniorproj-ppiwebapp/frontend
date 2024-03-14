@@ -120,7 +120,7 @@ $error-color: #eb6568
   display: flex
   flex-direction: column
   padding: 1rem
-  background: #f7fafc
+  background: #FDFEFD
   border: 2px dashed #e2e8f0
   border-radius: 6px
   transition: border-color 0.1s ease-out, width 1s ease
@@ -318,19 +318,18 @@ $error-color: #eb6568
 
 <script lang="ts">
 import router from "@/router";
-import {
-  ErrorMessage,
-  FileLoadError,
-  FileLoadErrorEnum,
-  FileUploadMeta,
-  FileUploadStatus,
-} from "@/types/upload";
+import { FileUploadMeta, FileUploadStatus } from "@/types/upload";
+import { MISSING_IMAGE, generateDataURL, validateFile } from "@/utils/image";
 import { defineComponent } from "vue";
-
-const MISSING_IMAGE = "/foot.png";
 
 export default defineComponent({
   name: "DropFile",
+  props: {
+    previewSize: {
+      type: Number,
+      default: 50,
+    },
+  },
   data() {
     return {
       FileUploadStatus,
@@ -414,8 +413,8 @@ export default defineComponent({
       return false;
     },
     async preprocessFile(meta: FileUploadMeta) {
-      const isValid = await this.validateFile(meta);
-      if (isValid) this.updatePreview(meta);
+      const isValid = await validateFile(meta);
+      if (isValid) await this.updatePreview(meta);
       else meta.preview = MISSING_IMAGE;
       this.$forceUpdate();
 
@@ -427,99 +426,8 @@ export default defineComponent({
     },
     async updatePreview(meta: FileUploadMeta) {
       if (meta.preview != MISSING_IMAGE) return;
-      meta.preview = await this.generateDataURL(meta.file);
+      meta.preview = await generateDataURL(meta.file, this.previewSize);
       this.$forceUpdate();
-    },
-    async generateDataURL(file: File) {
-      const dataUrl = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onerror = () => resolve(MISSING_IMAGE);
-        reader.onload = (readerEvent) => {
-          const image = new Image();
-          image.onerror = () => resolve(MISSING_IMAGE);
-          image.onload = () => {
-            // Resize the image
-            const canvas = document.createElement("canvas");
-            const max_size = 100;
-            let width = image.width;
-            let height = image.height;
-            if (width > height) {
-              if (width > max_size) {
-                height *= max_size / width;
-                width = max_size;
-              }
-            } else {
-              if (height > max_size) {
-                width *= max_size / height;
-                height = max_size;
-              }
-            }
-            canvas.width = width;
-            canvas.height = height;
-            canvas.getContext("2d")?.drawImage(image, 0, 0, width, height);
-            const dataUrl = canvas.toDataURL("image/jpeg");
-            return resolve(dataUrl);
-          };
-          const originalImageDataUrl = readerEvent.target?.result as string;
-          if (!originalImageDataUrl.startsWith("data:image/"))
-            return resolve(MISSING_IMAGE);
-
-          image.src = readerEvent.target?.result as string;
-        };
-        reader.readAsDataURL(file);
-      });
-      return dataUrl;
-    },
-    async validateFile(meta: FileUploadMeta) {
-      let error: FileLoadErrorEnum | null = null;
-      const setError = () => {
-        if (!error) return true;
-        const invmap = Object.fromEntries(
-          Object.entries(FileLoadError).map((kv) => kv.reverse())
-        ) as Record<FileLoadErrorEnum, keyof typeof FileLoadError>;
-        meta.message = ErrorMessage[invmap[error]];
-        meta.status = FileUploadStatus.FAILED;
-        return false;
-      };
-
-      // Check file size <= 5 MB
-      const allowedMaxSize = 5 * 1024 * 1024;
-      if (meta.file.size > allowedMaxSize) error = FileLoadError.TOOBIG;
-      if (error) return setError();
-
-      // Check file mime type
-      const allowedMimeTypes = ["image/png", "image/jpeg", "image/jpg"];
-      if (!allowedMimeTypes.includes(meta.file.type))
-        error = FileLoadError.UNSUPPORTED;
-
-      // Check file header magic number
-      const magic: Record<string, Array<number>> = {
-        "image/png": [0x89, 0x50, 0x4e, 0x47],
-        "image/jpeg": [0xff, 0xd8],
-        "image/jpg": [0xff, 0xd8],
-      };
-      error = await new Promise<FileLoadErrorEnum | null>((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = (e) => {
-          if (!e.target?.result) return resolve(FileLoadError.INACCESSIBLE);
-
-          const bytes = new Uint8Array(e.target.result as ArrayBufferLike);
-          for (let filetype in magic) {
-            let sliced = bytes.slice(0, magic[filetype].length);
-            let matchedLength = magic[filetype].length == sliced.length;
-            let matchedBytes = sliced.every((v, i) => v == magic[filetype][i]);
-            if (matchedLength && matchedBytes) return resolve(null);
-          }
-
-          return resolve(FileLoadError.UNSUPPORTED);
-        };
-        reader.readAsArrayBuffer(meta.file.slice(0, 4));
-      });
-      if (error) return setError();
-
-      // No error
-      meta.status = FileUploadStatus.WAITING;
-      return true;
     },
   },
 });

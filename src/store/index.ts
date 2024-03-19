@@ -56,6 +56,7 @@ export default createStore({
       return false;
     },
     async session(ctx) {
+      await handleAxiosResponse(() => axios.get("/api/session")); // CSRF cookie
       const res = await handleAxiosResponse(() => axios.post("/api/session"));
       if (res.status == 200) {
         const username = res.data as string;

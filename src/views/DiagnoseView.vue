@@ -58,7 +58,7 @@
       <div class="result" v-if="state == DiagnoseViewState.RESULT">
         <h1>
           <font-awesome-icon :icon="['fas', 'chart-simple']" />
-          <span> Diagnosis Result</span>
+          <span> Diagnosis No.{{ diagnosisId }}</span>
         </h1>
         <p ref="resultText">
           It is certain that this foot classifies as
@@ -126,7 +126,7 @@
     :isVisible="modal.cancelDiagnose"
     headerText="Diagnosis Cancellation"
     descriptionText="Do you want to cancel the diagnosis?"
-    @confirm="null"
+    @confirm="handleDiagnoseCancel"
     @cancel="modal.cancelDiagnose = false"
   />
 </template>
@@ -138,9 +138,11 @@ import ModalComponent from "@/components/ModalComponent.vue";
 import ModalTwoButton from "@/components/ModalTwoButton.vue";
 import LoadSpinner from "@/components/LoadSpinner.vue";
 import ProgressCircle from "@/components/ProgressCircle.vue";
-import { FileUploadMeta } from "@/types/upload";
+import { ErrorMessage, FileUploadMeta } from "@/types/upload";
 import { MISSING_IMAGE, generateDataURL } from "@/utils/image";
 import { applymap, CMRmap_data as colormap } from "@/utils/colormap";
+import axios from "axios";
+import { NavigationGuardNext } from "vue-router";
 
 const DiagnoseViewState = Object.freeze({
   IDLE: "idle",
@@ -156,8 +158,27 @@ interface ImageSet {
   heatmap: string;
 }
 
+interface DiagnosisUploadResponse {
+  filename: string;
+  success: string;
+  diagid?: number;
+  err?: string;
+}
+
+interface DiagnosisData {
+  id: number;
+  owner: string;
+  p_flat: number;
+  p_normal: number;
+  p_high: number;
+  stage: string;
+  created_date: string;
+}
+
+const POLLRATE = 30 * 1000; // milliseconds
+
 export default defineComponent({
-  name: "HomeView",
+  name: "DiagnoseView",
   components: {
     DropFileSingle,
     ModalTwoButton,
@@ -175,6 +196,7 @@ export default defineComponent({
         cancelDiagnose: false,
       },
       modalErrorMessage: "",
+      diagnosisId: 0,
       diagnosisResult: { flat: 0, normal: 0, high: 0 },
       diagnosisTime: new Date(),
       image: {
@@ -182,7 +204,26 @@ export default defineComponent({
         heatmap: MISSING_IMAGE,
       } as ImageSet,
       activeImage: "original" as keyof ImageSet,
+      abortController: new AbortController(),
+      routeNext: null as NavigationGuardNext | null,
     };
+  },
+  beforeRouteLeave(to, from, next) {
+    if (
+      this.state == DiagnoseViewState.UPLOAD ||
+      this.state == DiagnoseViewState.ANALYSE
+    ) {
+      this.routeNext = next;
+      this.modal.cancelDiagnose = true;
+    } else {
+      next();
+    }
+  },
+  beforeMount() {
+    window.addEventListener("beforeunload", this.preventNavigate);
+  },
+  beforeUnmount() {
+    window.removeEventListener("beforeunload", this.preventNavigate);
   },
   methods: {
     getFileLoader() {
@@ -205,6 +246,7 @@ export default defineComponent({
       this.image.original = MISSING_IMAGE;
       this.activeImage = "original";
       this.diagnosisResult = { flat: 0, normal: 0, high: 0 };
+      this.diagnosisId = 0;
       this.state = DiagnoseViewState.IDLE;
     },
     showImageOriginal() {
@@ -241,6 +283,37 @@ export default defineComponent({
         }
       );
     },
+    async upload() {
+      const fileLoader = this.getFileLoader();
+      if (!fileLoader?.uploadfile) return;
+
+      const formData = new FormData();
+      formData.append("file", fileLoader.uploadfile.file);
+
+      try {
+        // Perform upload with Axios
+        const res = await axios.post("/api/diagnose", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+          signal: this.abortController.signal,
+        });
+        const resdata = res.data as DiagnosisUploadResponse;
+        const { success, err, diagid } = resdata;
+
+        if (success) {
+          this.diagnosisId = diagid as number;
+          this.onImageUploaded();
+          return;
+        }
+
+        if (err?.startsWith("Unsupported file type"))
+          this.modalErrorMessage = ErrorMessage.UNSUPPORTED;
+        else this.modalErrorMessage = ErrorMessage.UPLOADFAILED;
+      } catch (err) {
+        this.modalErrorMessage = "An error occurred while uploading.";
+      }
+      this.modal.error = true;
+      this.resetView();
+    },
     onImageReady() {
       const fileLoader = this.getFileLoader();
       if (!fileLoader?.uploadfile) return;
@@ -251,8 +324,7 @@ export default defineComponent({
 
       this.state = DiagnoseViewState.UPLOAD;
 
-      //* do Upload Axios
-      setTimeout(() => this.onImageUploaded(), 200);
+      this.upload();
     },
     onImageError() {
       const fileLoader = this.getFileLoader();
@@ -261,22 +333,93 @@ export default defineComponent({
 
       this.modalErrorMessage = fileLoader.uploadfile.message;
       this.modal.error = true;
+      this.resetView();
+    },
+    async poll() {
+      try {
+        const diagID = this.diagnosisId;
+        const res = await axios.get(`/api/diagnose/${diagID}`);
+        const resdata = res.data as DiagnosisData;
+        return resdata as DiagnosisData;
+      } catch (err) {
+        console.log(err);
+      }
+      return;
     },
     onImageUploaded() {
       this.state = DiagnoseViewState.ANALYSE;
-      setTimeout(() => this.onImageAnalyzed(), 500);
+
+      new Promise<void>((resolve) => {
+        // Test whether diagnosis is complete
+        const testComplete = async () => {
+          const data = await this.poll();
+          if (!data) return false;
+          if (data["stage"] == "done") {
+            this.saveDiagnosisResult(data);
+            this.onImageAnalyzed();
+            return true;
+          }
+          if (data["stage"] == "err") {
+            this.onAnalyzeError();
+            return true;
+          }
+          return false;
+        };
+        // Polling loops with interval of POLLRATE
+        const resolver = async () => {
+          const doResolve = await testComplete();
+          if (doResolve) return resolve();
+          setTimeout(resolver, POLLRATE);
+        };
+        // Start polling
+        setTimeout(resolver, POLLRATE);
+      });
+    },
+    saveDiagnosisResult(data: DiagnosisData) {
+      this.diagnosisResult = {
+        flat: data["p_flat"] * 100,
+        normal: data["p_normal"] * 100,
+        high: data["p_high"] * 100,
+      };
+      this.diagnosisTime = new Date(Date.parse(data["created_date"]));
+    },
+    onAnalyzeError() {
+      this.modalErrorMessage = "Error occured while analyzing image.";
+      this.modal.error = true;
+      this.resetView();
     },
     onImageAnalyzed() {
       this.state = DiagnoseViewState.RESULT;
+    },
+    abortUpload() {
+      this.abortController.abort();
+      this.abortController = new AbortController();
+    },
+    abortAnalyze() {
+      axios.delete(`/api/diagnose/${this.diagnosisId}`);
+    },
+    handleDiagnoseCancel() {
+      this.abortUpload();
+      if (this.state == DiagnoseViewState.ANALYSE) this.abortAnalyze();
+      this.continueRoute();
+    },
+    continueRoute() {
+      if (this.routeNext) {
+        this.routeNext();
+        this.routeNext = null;
+      }
+    },
+    preventNavigate(e: BeforeUnloadEvent) {
+      if (
+        this.state != DiagnoseViewState.UPLOAD &&
+        this.state != DiagnoseViewState.ANALYSE
+      )
+        return;
 
-      //* Read & Set result values
-      setTimeout(() => {
-        let r = [Math.random(), Math.random(), Math.random()];
-        r = r.map((x) => Math.round(x * 1000) / 10);
-        this.diagnosisResult["flat"] = r[0];
-        this.diagnosisResult["normal"] = r[1];
-        this.diagnosisResult["high"] = r[2];
-      }, 20);
+      this.handleDiagnoseCancel();
+      this.resetView();
+      e.preventDefault();
+      e.returnValue = "";
     },
   },
 });

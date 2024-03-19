@@ -119,7 +119,7 @@ li
 li.checked
   position: relative
   &::before
-    content: "✔"
+    content: "\2714"
     position: absolute
     left: 6px
 </style>

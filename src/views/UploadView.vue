@@ -184,6 +184,12 @@ export default defineComponent({
       next();
     }
   },
+  beforeMount() {
+    window.addEventListener("beforeunload", this.preventNavigate);
+  },
+  beforeUnmount() {
+    window.removeEventListener("beforeunload", this.preventNavigate);
+  },
   methods: {
     getFileLoader() {
       return this.$refs.fileLoader as InstanceType<
@@ -357,6 +363,18 @@ export default defineComponent({
         this.routeNext();
         this.routeNext = null;
       }
+    },
+    preventNavigate(e: BeforeUnloadEvent) {
+      if (
+        this.state != UploadStatus.UPLOADING &&
+        this.state != UploadStatus.WAITING
+      )
+        return;
+
+      this.handleCancelUpload();
+      this.handleAbortUpload();
+      e.preventDefault();
+      e.returnValue = "";
     },
   },
 });

@@ -127,20 +127,51 @@ export default defineComponent({
   }),
   created() {
     this.$watch(
-      () => this.$store.getters.galleryReloadNeeded,
+      () => this.$store.getters.galleryhasUpdate,
       async () => {
-        await this.reloadGallery();
+        const data = this.$store.getters.galleryUpdateData;
+        if (!data) return;
+        await this.updateGalleryData(data);
+      },
+      { immediate: true }
+    );
+    this.$watch(
+      () => this.$store.getters.galleryHasUnload,
+      async () => {
+        const id = this.$store.getters.galleryUnloadId;
+        if (!id) return;
+        await this.unloadImageId(id);
+        this.$store.commit("resetUnloadGalleryImageId");
       },
       { immediate: true }
     );
   },
   methods: {
-    async reloadGallery() {
-      this.renderGallery = false;
+    async unloadImageId(id: number) {
+      for (let i = 0; i < this.images.length; i++) {
+        if (this.images[i].id == id) {
+          this.images.splice(i, 1);
+          return;
+        }
+      }
+    },
+    async updateImageId(id: number, data: ImageThumbnailData) {
+      for (let i = 0; i < this.images.length; i++) {
+        if (this.images[i].id == id) {
+          this.images[i] = data;
+          return;
+        }
+      }
+    },
+    async loadGallery() {
+      this.resetIndex();
       this.images = await this.loadImages();
       await this.$nextTick();
-      this.renderGallery = true;
-      this.$store.commit("resetGalleryReload");
+      this.hasNoMore = false;
+    },
+    async updateGalleryData(data: ImageThumbnailData) {
+      await this.updateImageId(data.id, data);
+      this.$store.commit("resetGalleryUpdateData");
     },
     async loadMoreImages() {
       this.isLoadingMore = true;
@@ -174,8 +205,9 @@ export default defineComponent({
       this.searchParams.sortby = params.sortby;
       this.searchParams.ascending = params.ascending;
       this.searched = false;
-      this.resetIndex();
-      await this.reloadGallery();
+      this.renderGallery = false;
+      await this.loadGallery();
+      this.renderGallery = true;
       this.searched = true;
     },
     serializeSearchParams() {
@@ -218,7 +250,8 @@ export default defineComponent({
     },
   },
   async mounted() {
-    await this.reloadGallery();
+    await this.loadGallery();
+    this.renderGallery = true;
     const gallery = this.$refs.gallery as HTMLDivElement | null;
     if (!gallery) return;
     const { offsetHeight, offsetWidth } = gallery;

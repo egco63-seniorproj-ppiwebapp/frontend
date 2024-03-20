@@ -339,8 +339,11 @@ export default defineComponent({
     closeWindow() {
       router.push("/images");
     },
-    reloadGallery() {
-      this.$store.commit("setGalleryReload");
+    updateGalleryData(data: ImageThumbnailData) {
+      this.$store.commit("setGalleryUpdateData", data);
+    },
+    unloadImageId(id: number) {
+      this.$store.commit("unloadGalleryImageId", id);
     },
     async startEditName() {
       this.isEditingName = true;
@@ -406,7 +409,16 @@ export default defineComponent({
       );
       if (res.status == 200) {
         this.setStateSaved();
-        this.reloadGallery();
+        this.updateGalleryData(
+          parseImageMetadata({
+            ...data,
+            created_date: "",
+            deleted_date: "",
+            link: "",
+            modify_date: "",
+            deleted: false,
+          })
+        );
       } else this.setStateError();
     },
     getSerializePatchData() {
@@ -430,7 +442,7 @@ export default defineComponent({
       );
       if (res.status == 200) {
         alert("Image is successfully deleted.");
-        this.reloadGallery();
+        this.unloadImageId(this.imgmeta.id);
         this.closeWindow();
       } else alert("Failed to delete image.");
     },

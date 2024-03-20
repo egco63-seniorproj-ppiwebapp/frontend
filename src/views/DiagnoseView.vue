@@ -143,6 +143,7 @@ import { MISSING_IMAGE, generateDataURL } from "@/utils/image";
 import { applymap, CMRmap_data as colormap } from "@/utils/colormap";
 import axios from "axios";
 import { NavigationGuardNext } from "vue-router";
+import { handleAxiosResponse } from "@/utils";
 
 const DiagnoseViewState = Object.freeze({
   IDLE: "idle",
@@ -302,10 +303,12 @@ export default defineComponent({
 
       try {
         // Perform upload with Axios
-        const res = await axios.post("/api/diagnose", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-          signal: this.abortController.signal,
-        });
+        const res = await handleAxiosResponse(() =>
+          axios.post("/api/diagnose", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+            signal: this.abortController.signal,
+          })
+        );
         const resdata = res.data as DiagnosisUploadResponse;
         const { success, err, diagid } = resdata;
 
@@ -348,7 +351,9 @@ export default defineComponent({
     async poll() {
       try {
         const diagID = this.diagnosisId;
-        const res = await axios.get(`/api/diagnose/${diagID}`);
+        const res = await handleAxiosResponse(() =>
+          axios.get(`/api/diagnose/${diagID}`)
+        );
         const resdata = res.data as DiagnosisData;
         return resdata as DiagnosisData;
       } catch (err) {
@@ -414,7 +419,9 @@ export default defineComponent({
       this.abortController = new AbortController();
     },
     abortAnalyze() {
-      axios.delete(`/api/diagnose/${this.diagnosisId}`);
+      handleAxiosResponse(() =>
+        axios.delete(`/api/diagnose/${this.diagnosisId}`)
+      );
     },
     handleDiagnoseCancel() {
       this.abortUpload();

@@ -322,7 +322,9 @@ export default defineComponent({
 
       if (!imgid) return;
 
-      let res = await axios.get(`/api/get_collection/${imgid}`);
+      let res = await handleAxiosResponse(() =>
+        axios.get(`/api/get_collection/${imgid}`)
+      );
       if (res.status != 200) return;
 
       const imgMetaList = res.data as Array<ImageMetadata>;

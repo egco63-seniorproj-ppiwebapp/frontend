@@ -148,6 +148,7 @@ import {
 } from "@/types/upload";
 import router from "@/router";
 import { NavigationGuardNext } from "vue-router";
+import { handleAxiosResponse } from "@/utils";
 
 export default defineComponent({
   name: "UploadView",
@@ -258,20 +259,22 @@ export default defineComponent({
 
         try {
           // Perform upload with Axios
-          const res = await axios.post("/api/add_collection", formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-            signal: this.abortController.signal,
-            onUploadProgress: (e) => {
-              // Update upload progress bar
-              const percentCompleted = Math.round(
-                (e.loaded * 100) / (e.total ?? 1)
-              );
-              for (let i = totalUploaded; i < totalLoaded; i++) {
-                const upload = filesToUpload[i];
-                upload.progress = percentCompleted;
-              }
-            },
-          });
+          const res = await handleAxiosResponse(() =>
+            axios.post("/api/add_collection", formData, {
+              headers: { "Content-Type": "multipart/form-data" },
+              signal: this.abortController.signal,
+              onUploadProgress: (e) => {
+                // Update upload progress bar
+                const percentCompleted = Math.round(
+                  (e.loaded * 100) / (e.total ?? 1)
+                );
+                for (let i = totalUploaded; i < totalLoaded; i++) {
+                  const upload = filesToUpload[i];
+                  upload.progress = percentCompleted;
+                }
+              },
+            })
+          );
 
           // Display upload result
           const resdata = res.data as UploadResponse;

@@ -10,11 +10,16 @@
       <div class="modal-footer">
         <input
           type="button"
-          value="Cancel"
+          :value="secondaryBtn"
           class="secondary"
           @click="cancelModal"
         />
-        <input type="button" value="OK" class="primary" @click="confirmModal" />
+        <input
+          type="button"
+          :value="primaryBtn"
+          class="primary"
+          @click="confirmModal"
+        />
       </div>
     </div>
   </div>
@@ -29,6 +34,14 @@ export default defineComponent({
     isVisible: Boolean,
     headerText: String,
     descriptionText: String,
+    primaryBtn: {
+      type: String,
+      default: "OK",
+    },
+    secondaryBtn: {
+      type: String,
+      default: "Cancel",
+    },
   },
   methods: {
     confirmModal() {

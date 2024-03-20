@@ -2,7 +2,11 @@
   <div class="labelcontainer">
     <div class="window">
       <div class="imgcontainer">
-        <img :src="imgdata.img" @error="setErrorImg" draggable="false" />
+        <img
+          :src="`${imgdata.img}?sz=600`"
+          @error="setErrorImg"
+          draggable="false"
+        />
         <div class="delete-btn-wrapper">
           <button class="delete-btn" @click="deleteImage">
             <font-awesome-icon :icon="['fas', 'trash-can']" />
@@ -318,7 +322,9 @@ export default defineComponent({
 
       if (!imgid) return;
 
-      let res = await axios.get(`/api/get_collection/${imgid}`);
+      let res = await handleAxiosResponse(() =>
+        axios.get(`/api/get_collection/${imgid}`)
+      );
       if (res.status != 200) return;
 
       const imgMetaList = res.data as Array<ImageMetadata>;
@@ -335,8 +341,11 @@ export default defineComponent({
     closeWindow() {
       router.push("/images");
     },
-    reloadGallery() {
-      this.$store.commit("setGalleryReload");
+    updateGalleryData(data: ImageThumbnailData) {
+      this.$store.commit("setGalleryUpdateData", data);
+    },
+    unloadImageId(id: number) {
+      this.$store.commit("unloadGalleryImageId", id);
     },
     async startEditName() {
       this.isEditingName = true;
@@ -402,7 +411,16 @@ export default defineComponent({
       );
       if (res.status == 200) {
         this.setStateSaved();
-        this.reloadGallery();
+        this.updateGalleryData(
+          parseImageMetadata({
+            ...data,
+            created_date: "",
+            deleted_date: "",
+            link: "",
+            modify_date: "",
+            deleted: false,
+          })
+        );
       } else this.setStateError();
     },
     getSerializePatchData() {
@@ -426,7 +444,7 @@ export default defineComponent({
       );
       if (res.status == 200) {
         alert("Image is successfully deleted.");
-        this.reloadGallery();
+        this.unloadImageId(this.imgmeta.id);
         this.closeWindow();
       } else alert("Failed to delete image.");
     },

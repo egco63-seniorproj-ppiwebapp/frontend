@@ -3,7 +3,7 @@
     <div class="search-panel">
       <ImageSearch :search-handler="search" />
     </div>
-    <div class="gallery">
+    <div class="gallery" @scroll="onGalleryScroll" ref="gallery">
       <LoadSpinner v-if="!renderGallery" />
       <ImageGrid :images="images" v-else-if="images.length > 0" />
       <div class="empty-gallery" v-else-if="searched">
@@ -25,6 +25,10 @@
           </button></router-link
         >
       </div>
+      <div class="gallery-footer" v-if="renderGallery">
+        <LoadSpinner v-if="isLoadingMore" />
+        <p v-if="hasNoMore">No more images</p>
+      </div>
     </div>
   </div>
   <router-view />
@@ -32,6 +36,7 @@
 
 <style lang="sass" scoped>
 @use '@/assets/styles/navbar'
+@use '@/assets/styles/base'
 
 .container
   display: grid
@@ -52,6 +57,27 @@
 .search-panel
   padding: 1.5rem
   height: calc(100vh - navbar.$navbar-height)
+
+.gallery-footer
+  display: flex
+  justify-content: center
+  color: base.$default-color
+  margin-top: 30px
+  margin-bottom: 40px
+
+  p
+    width: 100%
+    text-align: center
+    display: flex
+    justify-content: space-between
+    align-items: center
+    margin: 0 30%
+
+  p::before, p::after
+    content: " "
+    display: inline-block
+    width: 30%
+    border-top: 1px solid base.$default-color
 </style>
 
 <script lang="ts">
@@ -63,6 +89,15 @@ import { handleAxiosResponse, parseImageMetadata } from "@/utils";
 
 import axios from "axios";
 import LoadSpinner from "@/components/LoadSpinner.vue";
+
+interface ScrollEventTarget extends EventTarget {
+  scrollTop: number;
+  scrollHeight: number;
+  clientHeight: number;
+}
+
+const BATCH_LOAD_SIZE = 20;
+const EARLY_BOTTOM_DETECT_PIXEL = 100;
 
 export default defineComponent({
   name: "ImagesView",
@@ -81,28 +116,87 @@ export default defineComponent({
       sortby: "pk",
       ascending: false,
     } as SearchParameters,
+    batchLoaded: 0,
     indexingAt: {
       start: 0,
-      end: 20,
+      end: BATCH_LOAD_SIZE,
     },
+    hasNoMore: false,
+    isLoadingMore: false,
     searched: false,
   }),
   created() {
     this.$watch(
-      () => this.$store.getters.galleryReloadNeeded,
+      () => this.$store.getters.galleryhasUpdate,
       async () => {
-        await this.reloadGallery();
+        const data = this.$store.getters.galleryUpdateData;
+        if (!data) return;
+        await this.updateGalleryData(data);
+      },
+      { immediate: true }
+    );
+    this.$watch(
+      () => this.$store.getters.galleryHasUnload,
+      async () => {
+        const id = this.$store.getters.galleryUnloadId;
+        if (!id) return;
+        await this.unloadImageId(id);
+        this.$store.commit("resetUnloadGalleryImageId");
       },
       { immediate: true }
     );
   },
   methods: {
-    async reloadGallery() {
-      this.renderGallery = false;
+    async unloadImageId(id: number) {
+      for (let i = 0; i < this.images.length; i++) {
+        if (this.images[i].id == id) {
+          this.images.splice(i, 1);
+          return;
+        }
+      }
+    },
+    async updateImageId(id: number, data: ImageThumbnailData) {
+      for (let i = 0; i < this.images.length; i++) {
+        if (this.images[i].id == id) {
+          this.images[i] = data;
+          return;
+        }
+      }
+    },
+    async loadGallery() {
+      this.resetIndex();
       this.images = await this.loadImages();
       await this.$nextTick();
-      this.renderGallery = true;
-      this.$store.commit("resetGalleryReload");
+      this.hasNoMore = false;
+    },
+    async updateGalleryData(data: ImageThumbnailData) {
+      await this.updateImageId(data.id, data);
+      this.$store.commit("resetGalleryUpdateData");
+    },
+    async loadMoreImages() {
+      this.isLoadingMore = true;
+      this.batchLoaded++;
+      this.indexingAt.start = this.batchLoaded * BATCH_LOAD_SIZE;
+      this.indexingAt.end = this.indexingAt.start + BATCH_LOAD_SIZE;
+      const newImages = await this.loadImages();
+      this.images.push(...newImages);
+      if (newImages.length < BATCH_LOAD_SIZE) this.hasNoMore = true;
+      this.isLoadingMore = false;
+    },
+    onGalleryScroll(e: UIEvent) {
+      if (this.isLoadingMore || this.hasNoMore) return;
+
+      const { scrollTop, clientHeight, scrollHeight } =
+        e.target as ScrollEventTarget;
+      if (scrollTop + clientHeight >= scrollHeight - EARLY_BOTTOM_DETECT_PIXEL)
+        this.loadMoreImages();
+    },
+    resetIndex() {
+      this.batchLoaded = 0;
+      this.indexingAt.start = 0;
+      this.indexingAt.end = BATCH_LOAD_SIZE;
+      this.hasNoMore = false;
+      this.isLoadingMore = false;
     },
     async search(params: SearchParameters) {
       this.searchParams.name = params.name;
@@ -111,7 +205,9 @@ export default defineComponent({
       this.searchParams.sortby = params.sortby;
       this.searchParams.ascending = params.ascending;
       this.searched = false;
-      await this.reloadGallery();
+      this.renderGallery = false;
+      await this.loadGallery();
+      this.renderGallery = true;
       this.searched = true;
     },
     serializeSearchParams() {
@@ -154,8 +250,19 @@ export default defineComponent({
     },
   },
   async mounted() {
-    // console.log(this.searchParams);
-    this.reloadGallery();
+    await this.loadGallery();
+    this.renderGallery = true;
+    const gallery = this.$refs.gallery as HTMLDivElement | null;
+    if (!gallery) return;
+    const { offsetHeight, offsetWidth } = gallery;
+    const cardHeight = 300;
+    const cardWidth = 200;
+    const gapSize = 20;
+    const visibleRows = (offsetHeight + gapSize) / (cardHeight + gapSize);
+    const visibleColumns = (offsetWidth + gapSize) / (cardWidth + gapSize);
+    const visibleCards = Math.ceil(visibleRows) * Math.floor(visibleColumns);
+    while (this.images.length <= visibleCards && !this.hasNoMore)
+      await this.loadMoreImages();
   },
 });
 </script>

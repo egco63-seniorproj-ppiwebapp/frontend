@@ -2,7 +2,7 @@
   <div class="labelcontainer" v-if="hasUnlabelRemain">
     <div class="imgcontainer">
       <img
-        :src="imgdata.img"
+        :src="`${imgdata.img}?sz=600`"
         @error="setErrorImg"
         draggable="false"
         :style="{ display: isLoading ? 'none' : 'block' }"
@@ -339,9 +339,11 @@ export default defineComponent({
       validParams.append("ascending", JSON.stringify(true));
       validParams.append("filter", "U");
 
-      let res = await axios.get(`/api/get_collection/`, {
-        params: validParams,
-      });
+      let res = await handleAxiosResponse(() =>
+        axios.get(`/api/get_collection/`, {
+          params: validParams,
+        })
+      );
       if (res.status != 200) return;
 
       const imgMetaList = res.data as Array<ImageMetadata>;

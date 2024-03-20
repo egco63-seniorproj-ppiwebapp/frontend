@@ -219,7 +219,8 @@ export default defineComponent({
   },
   async mounted() {
     await this.reloadGallery();
-    const gallery = this.$refs.gallery as HTMLDivElement;
+    const gallery = this.$refs.gallery as HTMLDivElement | null;
+    if (!gallery) return;
     const { offsetHeight, offsetWidth } = gallery;
     const cardHeight = 300;
     const cardWidth = 200;

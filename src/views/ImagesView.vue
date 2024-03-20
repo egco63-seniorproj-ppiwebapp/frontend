@@ -3,7 +3,7 @@
     <div class="search-panel">
       <ImageSearch :search-handler="search" />
     </div>
-    <div class="gallery">
+    <div class="gallery" @scroll="onGalleryScroll">
       <LoadSpinner v-if="!renderGallery" />
       <ImageGrid :images="images" v-else-if="images.length > 0" />
       <div class="empty-gallery" v-else-if="searched">
@@ -64,6 +64,15 @@ import { handleAxiosResponse, parseImageMetadata } from "@/utils";
 import axios from "axios";
 import LoadSpinner from "@/components/LoadSpinner.vue";
 
+interface ScrollEventTarget extends EventTarget {
+  scrollTop: number;
+  scrollHeight: number;
+  clientHeight: number;
+}
+
+const BATCH_LOAD_SIZE = 6;
+const EARLY_BOTTOM_DETECT_PIXEL = 100;
+
 export default defineComponent({
   name: "ImagesView",
   components: {
@@ -81,10 +90,13 @@ export default defineComponent({
       sortby: "pk",
       ascending: false,
     } as SearchParameters,
+    batchLoaded: 0,
     indexingAt: {
       start: 0,
-      end: 20,
+      end: BATCH_LOAD_SIZE,
     },
+    hasNoMore: false,
+    isLoadingMore: false,
     searched: false,
   }),
   created() {
@@ -104,6 +116,31 @@ export default defineComponent({
       this.renderGallery = true;
       this.$store.commit("resetGalleryReload");
     },
+    async loadMoreImages() {
+      this.isLoadingMore = true;
+      this.batchLoaded++;
+      this.indexingAt.start = this.batchLoaded * BATCH_LOAD_SIZE;
+      this.indexingAt.end = this.indexingAt.start + BATCH_LOAD_SIZE;
+      const newImages = await this.loadImages();
+      this.images.push(...newImages);
+      if (newImages.length < BATCH_LOAD_SIZE) this.hasNoMore = true;
+      this.isLoadingMore = false;
+    },
+    onGalleryScroll(e: UIEvent) {
+      if (this.isLoadingMore || this.hasNoMore) return;
+
+      const { scrollTop, clientHeight, scrollHeight } =
+        e.target as ScrollEventTarget;
+      if (scrollTop + clientHeight >= scrollHeight - EARLY_BOTTOM_DETECT_PIXEL)
+        this.loadMoreImages();
+    },
+    resetIndex() {
+      this.batchLoaded = 0;
+      this.indexingAt.start = 0;
+      this.indexingAt.end = BATCH_LOAD_SIZE;
+      this.hasNoMore = false;
+      this.isLoadingMore = false;
+    },
     async search(params: SearchParameters) {
       this.searchParams.name = params.name;
       this.searchParams.footlabel = params.footlabel;
@@ -111,6 +148,7 @@ export default defineComponent({
       this.searchParams.sortby = params.sortby;
       this.searchParams.ascending = params.ascending;
       this.searched = false;
+      this.resetIndex();
       await this.reloadGallery();
       this.searched = true;
     },

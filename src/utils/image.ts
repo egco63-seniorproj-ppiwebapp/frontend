@@ -11,7 +11,8 @@ export async function generateDataURL(
   file: File,
   maxSize: number | undefined = 100,
   mimeType: string | undefined = "image/png",
-  filterFn?: (ctx: CanvasRenderingContext2D) => void
+  filter: string | undefined = "",
+  postProcess?: (ctx: CanvasRenderingContext2D) => void
 ) {
   const dataUrl = await new Promise<string>((resolve) => {
     const reader = new FileReader();
@@ -39,8 +40,9 @@ export async function generateDataURL(
         canvas.height = height;
         const ctx = canvas.getContext("2d");
         if (!ctx) return resolve(MISSING_IMAGE);
+        ctx.filter = filter;
         ctx.drawImage(image, 0, 0, width, height);
-        if (filterFn) filterFn(ctx);
+        if (postProcess) postProcess(ctx);
         const dataUrl = canvas.toDataURL(mimeType);
         return resolve(dataUrl);
       };

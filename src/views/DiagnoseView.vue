@@ -262,6 +262,7 @@ export default defineComponent({
         fileLoader.uploadfile.file,
         600,
         undefined,
+        "blur(5px) grayscale(100%) invert(100%)",
         (ctx) => {
           const img = ctx.getImageData(
             0,
@@ -269,10 +270,16 @@ export default defineComponent({
             ctx.canvas.width,
             ctx.canvas.height
           );
+          let [max, min] = [0, 256];
           for (let i = 0; i < img.data.length; i += 4) {
             const rgb = img.data.slice(i, i + 3);
-            const v = rgb.reduce((a, b) => a + b) / 3;
-            const [r, g, b] = applymap(v / 255, colormap).map((v) =>
+            if (rgb[0] < min) min = rgb[0];
+            if (rgb[0] > max) max = rgb[0];
+          }
+          for (let i = 0; i < img.data.length; i += 4) {
+            const rgb = img.data.slice(i, i + 3);
+            const v = (rgb[0] - min) / (max - min);
+            const [r, g, b] = applymap(v, colormap).map((v) =>
               Math.floor(v * 255)
             );
             img.data[i] = r;

@@ -3,7 +3,7 @@
     <div class="search-panel">
       <ImageSearch :search-handler="search" />
     </div>
-    <div class="gallery" @scroll="onGalleryScroll">
+    <div class="gallery" @scroll="onGalleryScroll" ref="gallery">
       <LoadSpinner v-if="!renderGallery" />
       <ImageGrid :images="images" v-else-if="images.length > 0" />
       <div class="empty-gallery" v-else-if="searched">
@@ -25,6 +25,10 @@
           </button></router-link
         >
       </div>
+      <div class="gallery-footer" v-if="renderGallery">
+        <LoadSpinner v-if="isLoadingMore" />
+        <p v-if="hasNoMore">No more images</p>
+      </div>
     </div>
   </div>
   <router-view />
@@ -32,6 +36,7 @@
 
 <style lang="sass" scoped>
 @use '@/assets/styles/navbar'
+@use '@/assets/styles/base'
 
 .container
   display: grid
@@ -52,6 +57,27 @@
 .search-panel
   padding: 1.5rem
   height: calc(100vh - navbar.$navbar-height)
+
+.gallery-footer
+  display: flex
+  justify-content: center
+  color: base.$default-color
+  margin-top: 30px
+  margin-bottom: 40px
+
+  p
+    width: 100%
+    text-align: center
+    display: flex
+    justify-content: space-between
+    align-items: center
+    margin: 0 30%
+
+  p::before, p::after
+    content: " "
+    display: inline-block
+    width: 30%
+    border-top: 1px solid base.$default-color
 </style>
 
 <script lang="ts">
@@ -70,7 +96,7 @@ interface ScrollEventTarget extends EventTarget {
   clientHeight: number;
 }
 
-const BATCH_LOAD_SIZE = 6;
+const BATCH_LOAD_SIZE = 20;
 const EARLY_BOTTOM_DETECT_PIXEL = 100;
 
 export default defineComponent({
@@ -192,8 +218,17 @@ export default defineComponent({
     },
   },
   async mounted() {
-    // console.log(this.searchParams);
-    this.reloadGallery();
+    await this.reloadGallery();
+    const gallery = this.$refs.gallery as HTMLDivElement;
+    const { offsetHeight, offsetWidth } = gallery;
+    const cardHeight = 300;
+    const cardWidth = 200;
+    const gapSize = 20;
+    const visibleRows = (offsetHeight + gapSize) / (cardHeight + gapSize);
+    const visibleColumns = (offsetWidth + gapSize) / (cardWidth + gapSize);
+    const visibleCards = Math.ceil(visibleRows) * Math.floor(visibleColumns);
+    while (this.images.length <= visibleCards && !this.hasNoMore)
+      await this.loadMoreImages();
   },
 });
 </script>

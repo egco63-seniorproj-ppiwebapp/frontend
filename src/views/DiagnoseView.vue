@@ -176,6 +176,7 @@ interface DiagnosisData {
 }
 
 const POLLRATE = 30 * 1000; // milliseconds
+const MAX_POLL_RETRY = 5;
 
 export default defineComponent({
   name: "DiagnoseView",
@@ -205,6 +206,7 @@ export default defineComponent({
       } as ImageSet,
       activeImage: "original" as keyof ImageSet,
       abortController: new AbortController(),
+      stopPoll: false,
       routeNext: null as NavigationGuardNext | null,
     };
   },
@@ -223,6 +225,7 @@ export default defineComponent({
     window.addEventListener("beforeunload", this.preventNavigate);
   },
   beforeUnmount() {
+    this.stopPoll = true;
     window.removeEventListener("beforeunload", this.preventNavigate);
   },
   methods: {
@@ -349,18 +352,22 @@ export default defineComponent({
         const resdata = res.data as DiagnosisData;
         return resdata as DiagnosisData;
       } catch (err) {
-        console.log(err);
+        this.onAnalyzeError();
       }
       return;
     },
     onImageUploaded() {
       this.state = DiagnoseViewState.ANALYSE;
-
+      let retry = 0;
       new Promise<void>((resolve) => {
         // Test whether diagnosis is complete
         const testComplete = async () => {
           const data = await this.poll();
-          if (!data) return false;
+          if (!data) {
+            if (retry > MAX_POLL_RETRY) return true;
+            retry++;
+            return false;
+          }
           if (data["stage"] == "done") {
             this.saveDiagnosisResult(data);
             this.onImageAnalyzed();
@@ -373,13 +380,17 @@ export default defineComponent({
           return false;
         };
         // Polling loops with interval of POLLRATE
+        let timeoutId: number;
         const resolver = async () => {
           const doResolve = await testComplete();
-          if (doResolve) return resolve();
+          if (doResolve || this.stopPoll) {
+            clearTimeout(timeoutId);
+            return resolve();
+          }
           setTimeout(resolver, POLLRATE);
         };
         // Start polling
-        setTimeout(resolver, POLLRATE);
+        timeoutId = setTimeout(resolver, POLLRATE);
       });
     },
     saveDiagnosisResult(data: DiagnosisData) {

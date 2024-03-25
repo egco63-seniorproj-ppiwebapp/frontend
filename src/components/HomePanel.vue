@@ -2,7 +2,7 @@
   <div class="panel">
     <div class="profile">
       <div class="profilepic">
-        <img src="@/assets/logo.png" />
+        <img src="/logo.png" />
       </div>
       <h2>Welcome! {{ username }}</h2>
     </div>

@@ -84,7 +84,7 @@
                 <img class="background-decal" src="/foot.png" />
                 <ProgressCircle :percent="percent" />
               </div>
-              <div class="percent">{{ percent }}%</div>
+              <div class="percent">{{ Math.round(percent * 100) / 100 }}%</div>
               <div class="label">
                 <span>{{
                   label.charAt(0).toUpperCase() + label.slice(1)
@@ -176,7 +176,7 @@ interface DiagnosisData {
   created_date: string;
 }
 
-const POLLRATE = 30 * 1000; // milliseconds
+const POLLRATE = 0.5 * 1000; // milliseconds
 const MAX_POLL_RETRY = 5;
 
 export default defineComponent({

@@ -176,7 +176,7 @@ interface DiagnosisData {
   created_date: string;
 }
 
-const POLLRATE = 0.5 * 1000; // milliseconds
+const POLLRATE = 10 * 1000; // milliseconds
 const MAX_POLL_RETRY = 5;
 
 export default defineComponent({

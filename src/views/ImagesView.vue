@@ -25,7 +25,7 @@
           </button></router-link
         >
       </div>
-      <div class="gallery-footer" v-if="renderGallery">
+      <div class="gallery-footer" v-if="renderGallery && images.length > 0">
         <LoadSpinner v-if="isLoadingMore" />
         <p v-if="hasNoMore">No more images</p>
       </div>

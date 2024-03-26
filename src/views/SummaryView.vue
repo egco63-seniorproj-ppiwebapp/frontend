@@ -31,20 +31,24 @@
     </div>
     <div class="donut donut1">
       <h2 class="donut-title">{{ "All users" }}</h2>
-      <Doughnut
-        :data="donut1.data"
-        :options="(donut1.options as any)"
-        v-if="dataReady && ready"
-      />
+      <template v-if="dataReady && ready">
+        <Doughnut :data="donut1.data" :options="(donut1.options as any)" />
+        <div
+          class="donut-no-data"
+          v-if="allLabelCount.some((v) => v <= 0)"
+        ></div>
+      </template>
       <LoadSpinner v-else style="height: 220px; margin-bottom: 100px" />
     </div>
     <div class="donut donut2">
       <h2 class="donut-title">{{ "Yours" }}</h2>
-      <Doughnut
-        :data="donut2.data"
-        :options="(donut2.options as any)"
-        v-if="dataReady && ready"
-      />
+      <template v-if="dataReady && ready">
+        <Doughnut :data="donut2.data" :options="(donut2.options as any)" />
+        <div
+          class="donut-no-data"
+          v-if="userLabelCount.some((v) => v <= 0)"
+        ></div>
+      </template>
       <LoadSpinner v-else style="height: 220px; margin-bottom: 100px" />
     </div>
     <div class="trend">
@@ -215,6 +219,22 @@ span.callout
   grid-area: donut1
 .donut2
   grid-area: donut2
+
+.donut
+  .donut-no-data
+    border-radius: 50%
+    border: 50px solid lightgray
+    height: 75%
+    width: 75%
+    position: absolute
+    top: 12.5%
+    left: 12.5%
+    &::after
+      content: "No data"
+      width: 100%
+      display: block
+      text-align: center
+      margin-top: -30px
 
 
 .donut-title

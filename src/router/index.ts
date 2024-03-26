@@ -94,7 +94,7 @@ declare module "vue-router" {
 
 router.beforeEach(async (to, from, next) => {
   const title = to.meta.title;
-  if (title) document.title = `WebApp - ${title}`;
+  if (title) document.title = `FootAI - ${title}`;
 
   const store = useStore(key);
 

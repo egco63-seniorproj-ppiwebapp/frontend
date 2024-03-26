@@ -317,6 +317,7 @@ export default defineComponent({
     isSaved: false,
     isSaving: false,
     saveError: false,
+    isDeleted: false,
     modal: {
       unsavedChanges: false,
       deleteConfirm: false,
@@ -335,6 +336,7 @@ export default defineComponent({
     );
   },
   beforeRouteLeave(to, from, next) {
+    if (this.isDeleted) return next();
     if (this.hasChanges) {
       this.routeNext = next;
       this.checkChanges();
@@ -469,6 +471,7 @@ export default defineComponent({
       if (res.status == 200) {
         this.modal.deleteSuccess = true;
         this.unloadImageId(this.imgmeta.id);
+        this.isDeleted = true;
       } else {
         this.modal.deleteFailed = true;
       }

@@ -478,6 +478,8 @@ export default defineComponent({
       );
       if (res.status == 200) {
         this.modal.deleteSuccess = true;
+        this.setStateSaved();
+        this.saveStatusTimeout();
         await this.load();
         this.$forceUpdate();
       } else {

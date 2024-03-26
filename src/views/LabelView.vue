@@ -8,7 +8,7 @@
         :style="{ display: isLoading ? 'none' : 'block' }"
       />
       <div class="delete-btn-wrapper">
-        <button class="delete-btn" @click="deleteImage">
+        <button class="delete-btn" @click="modal.deleteConfirm = true">
           <font-awesome-icon :icon="['fas', 'trash-can']" />
         </button>
       </div>
@@ -136,13 +136,32 @@
       </button></router-link
     >
   </div>
-  <ModelTwoButton
-    :isVisible="showModal"
+  <ModalTwoButton
+    :isVisible="modal.unsavedChanges"
     headerText="Unsaved Changes"
     descriptionText="You still have unsaved changes. Do you want to continue?"
-    @confirm="handleConfirm"
-    @cancel="handleCancel"
-  ></ModelTwoButton>
+    @confirm="handleConfirmUnsaved"
+    @cancel="modal.unsavedChanges = false"
+  ></ModalTwoButton>
+  <ModalTwoButton
+    :isVisible="modal.deleteConfirm"
+    headerText="Delete confirmation"
+    descriptionText="Do you want to delete this image?"
+    @confirm="handleConfirmDelete"
+    @cancel="modal.deleteConfirm = false"
+  ></ModalTwoButton>
+  <ModalComponent
+    :isVisible="modal.deleteFailed"
+    headerText="Error occured"
+    descriptionText="This image cannot be deleted."
+    @close="modal.deleteFailed = false"
+  ></ModalComponent>
+  <ModalComponent
+    :isVisible="modal.deleteSuccess"
+    headerText="Deletion Complete"
+    descriptionText="This image is deleted successfully."
+    @close="modal.deleteSuccess = false"
+  ></ModalComponent>
 </template>
 
 <style lang="sass" scoped>
@@ -279,7 +298,8 @@ import { ImageThumbnailData, ImageMetadata } from "@/types";
 import { parseImageMetadata, handleAxiosResponse, sleep } from "@/utils";
 import RadioButton from "@/components/RadioButton.vue";
 import LoadSpinner from "@/components/LoadSpinner.vue";
-import ModelTwoButton from "@/components/ModalTwoButton.vue";
+import ModalTwoButton from "@/components/ModalTwoButton.vue";
+import ModalComponent from "@/components/ModalComponent.vue";
 import { NavigationGuardNext } from "vue-router";
 
 // import images from "@/assets/images.json";
@@ -292,7 +312,8 @@ export default defineComponent({
   components: {
     RadioButton,
     LoadSpinner,
-    ModelTwoButton,
+    ModalTwoButton,
+    ModalComponent,
   },
   data: () => ({
     imgdata: {
@@ -310,7 +331,12 @@ export default defineComponent({
     saveError: false,
     hasUnlabelRemain: true,
     isLoading: false,
-    showModal: false,
+    modal: {
+      unsavedChanges: false,
+      deleteConfirm: false,
+      deleteFailed: false,
+      deleteSuccess: false,
+    },
     routeNext: null as NavigationGuardNext | null,
   }),
   created() {
@@ -444,8 +470,6 @@ export default defineComponent({
       };
     },
     async deleteImage() {
-      if (!confirm("Do you want to delete this image?")) return;
-
       const res = await handleAxiosResponse(() =>
         axios.patch("/api/patch_collection", {
           id: this.imgmeta.id,
@@ -453,24 +477,27 @@ export default defineComponent({
         })
       );
       if (res.status == 200) {
-        alert("Image is successfully deleted.");
+        this.modal.deleteSuccess = true;
         await this.load();
         this.$forceUpdate();
-      } else alert("Failed to delete image.");
+      } else {
+        this.modal.deleteFailed = true;
+      }
     },
-    handleConfirm() {
+    handleConfirmUnsaved() {
       if (this.routeNext) {
         this.routeNext();
         this.routeNext = null;
       }
-      this.showModal = false;
+      this.modal.unsavedChanges = false;
     },
-    handleCancel() {
-      this.showModal = false;
+    handleConfirmDelete() {
+      this.modal.deleteConfirm = false;
+      this.deleteImage();
     },
     checkChanges() {
       if (this.hasChanges) {
-        this.showModal = true;
+        this.modal.unsavedChanges = true;
       }
     },
   },

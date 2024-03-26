@@ -35,7 +35,7 @@
         <Doughnut :data="donut1.data" :options="(donut1.options as any)" />
         <div
           class="donut-no-data"
-          v-if="allLabelCount.some((v) => v <= 0)"
+          v-if="allLabelCount.every((v) => v <= 0)"
         ></div>
       </template>
       <LoadSpinner v-else style="height: 220px; margin-bottom: 100px" />
@@ -46,7 +46,7 @@
         <Doughnut :data="donut2.data" :options="(donut2.options as any)" />
         <div
           class="donut-no-data"
-          v-if="userLabelCount.some((v) => v <= 0)"
+          v-if="userLabelCount.every((v) => v <= 0)"
         ></div>
       </template>
       <LoadSpinner v-else style="height: 220px; margin-bottom: 100px" />
